@@ -23,6 +23,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { useStore } from "@/lib/bgos/store";
+import { AiChatWidget } from "./AiChatWidget";
 import { QrScanDialog } from "./QrScanDialog";
 
 type NavItem = { to: string; label: string; icon: typeof Bell; exact?: boolean };
@@ -111,7 +112,14 @@ export function AppLayout() {
         <div className="mt-4 flex-1 overflow-y-auto">
           <NavList />
         </div>
-        <Button variant="ghost" className="justify-start gap-3 rounded-xl text-muted-foreground" onClick={() => { logout(); navigate({ to: "/login" }); }}>
+        <Button
+          variant="ghost"
+          className="justify-start gap-3 rounded-xl text-muted-foreground"
+          onClick={() => {
+            logout();
+            navigate({ to: "/login" });
+          }}
+        >
           <LogOut className="h-4.5 w-4.5" /> Đăng xuất
         </Button>
       </aside>
@@ -154,7 +162,13 @@ export function AppLayout() {
             <div className="ml-auto flex items-center gap-1.5 md:ml-0">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="outline" size="icon" className="rounded-xl" onClick={() => setScanOpen(true)} aria-label="Quét mã QR">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="rounded-xl"
+                    onClick={() => setScanOpen(true)}
+                    aria-label="Quét mã QR"
+                  >
                     <QrCode className="h-4.5 w-4.5" />
                   </Button>
                 </TooltipTrigger>
@@ -162,7 +176,13 @@ export function AppLayout() {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative rounded-xl" asChild aria-label="Thông báo">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="relative rounded-xl"
+                    asChild
+                    aria-label="Thông báo"
+                  >
                     <Link to="/app/notifications">
                       <Bell className="h-4.5 w-4.5" />
                       {unread > 0 ? (
@@ -175,11 +195,15 @@ export function AppLayout() {
               </Tooltip>
               <div className="ml-1 flex items-center gap-2">
                 <Avatar className="h-9 w-9">
-                  <AvatarFallback className="bg-primary/12 text-xs font-semibold text-primary">{initials}</AvatarFallback>
+                  <AvatarFallback className="bg-primary/12 text-xs font-semibold text-primary">
+                    {initials}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="hidden leading-tight sm:block">
                   <p className="text-sm font-medium">{session?.user.name ?? "Khách demo"}</p>
-                  <p className="text-xs text-muted-foreground">{session?.user.role ?? "Nhân viên"}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {session?.user.role ?? "Nhân viên"}
+                  </p>
                 </div>
               </div>
             </div>
@@ -212,7 +236,12 @@ export function AppLayout() {
         </div>
       </nav>
 
-      <QrScanDialog open={scanOpen} onOpenChange={setScanOpen} onScanned={(id) => navigate({ to: "/app/games/$gameId", params: { gameId: id } })} />
+      <AiChatWidget />
+      <QrScanDialog
+        open={scanOpen}
+        onOpenChange={setScanOpen}
+        onScanned={(id) => navigate({ to: "/app/games/$gameId", params: { gameId: id } })}
+      />
     </div>
   );
 }
