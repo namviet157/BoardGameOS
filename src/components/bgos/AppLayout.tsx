@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   Bell,
@@ -16,6 +16,7 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -26,7 +27,13 @@ import { useStore } from "@/lib/bgos/store";
 import { AiChatWidget } from "./AiChatWidget";
 import { QrScanDialog } from "./QrScanDialog";
 
-type NavItem = { to: string; label: string; icon: typeof Bell; exact?: boolean };
+type NavItem = {
+  to: string;
+  label: string;
+  icon: typeof Bell;
+  exact?: boolean;
+  ownerOnly?: boolean;
+};
 
 export const NAV_ITEMS: NavItem[] = [
   { to: "/app", label: "Tổng quan", icon: LayoutDashboard, exact: true },
@@ -35,13 +42,25 @@ export const NAV_ITEMS: NavItem[] = [
   { to: "/app/handover", label: "Giao nhận game", icon: Repeat },
   { to: "/app/checklist", label: "Kiểm tra linh kiện", icon: ClipboardCheck },
   { to: "/app/advisor", label: "Tư vấn game", icon: Sparkles },
-  { to: "/app/staff", label: "Nhân viên", icon: Users },
-  { to: "/app/reports", label: "Báo cáo", icon: TrendingUp },
-  { to: "/app/notifications", label: "Thông báo", icon: Bell },
-  { to: "/app/settings", label: "Cài đặt", icon: Settings },
+  { to: "/app/staff", label: "Nhân viên", icon: Users, ownerOnly: true },
+  { to: "/app/reports", label: "Báo cáo", icon: TrendingUp, ownerOnly: true },
+  { to: "/app/notifications", label: "Thông báo", icon: Bell, ownerOnly: true },
+  { to: "/app/settings", label: "Cài đặt", icon: Settings, ownerOnly: true },
 ];
 
-const MOBILE_ITEMS = [NAV_ITEMS[0], NAV_ITEMS[1], NAV_ITEMS[3], NAV_ITEMS[2], NAV_ITEMS[8]];
+const MOBILE_ITEM_PATHS = [
+  "/app",
+  "/app/games",
+  "/app/handover",
+  "/app/tables",
+  "/app/notifications",
+];
+
+const OWNER_ONLY_PATHS = NAV_ITEMS.filter((item) => item.ownerOnly).map((item) => item.to);
+
+function canAccessNavItem(item: NavItem, role?: string) {
+  return !item.ownerOnly || role === "Chủ quán";
+}
 
 function Brand() {
   return (
@@ -54,14 +73,14 @@ function Brand() {
   );
 }
 
-function NavList({ onNavigate }: { onNavigate?: () => void }) {
+function NavList({ items, onNavigate }: { items: NavItem[]; onNavigate?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { notifications } = useStore();
   const unread = notifications.filter((n) => !n.read).length;
 
   return (
     <nav className="space-y-1">
-      {NAV_ITEMS.map((item) => {
+      {items.map((item) => {
         const active = item.exact ? pathname === item.to : pathname.startsWith(item.to);
         return (
           <Link
@@ -91,11 +110,32 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
 
 export function AppLayout() {
   const navigate = useNavigate();
-  const { session, logout, settings, notifications } = useStore();
+  const { hydrated, session, logout, settings, notifications } = useStore();
   const [scanOpen, setScanOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const unread = notifications.filter((n) => !n.read).length;
+  const role = session?.user.role;
+  const isOwner = role === "Chủ quán";
+  const visibleNavItems = NAV_ITEMS.filter((item) => canAccessNavItem(item, role));
+  const mobileItems = MOBILE_ITEM_PATHS.flatMap((path) => {
+    const item = visibleNavItems.find((candidate) => candidate.to === path);
+    return item ? [item] : [];
+  });
+  const isOwnerOnlyPath = OWNER_ONLY_PATHS.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
+  );
+  const accessDenied = hydrated && !isOwner && isOwnerOnlyPath;
+  const hideRouteContent = isOwnerOnlyPath && (!hydrated || accessDenied);
+
+  useEffect(() => {
+    if (!accessDenied) return;
+
+    toast.error("Bạn không có quyền truy cập chức năng này.", {
+      id: "owner-only-route",
+    });
+    void navigate({ to: "/app", replace: true });
+  }, [accessDenied, navigate]);
 
   const initials = (session?.user.name ?? "BG")
     .split(" ")
@@ -110,7 +150,7 @@ export function AppLayout() {
           <Brand />
         </div>
         <div className="mt-4 flex-1 overflow-y-auto">
-          <NavList />
+          <NavList items={visibleNavItems} />
         </div>
         <Button
           variant="ghost"
@@ -138,7 +178,7 @@ export function AppLayout() {
                   <Brand />
                 </div>
                 <div className="mt-4">
-                  <NavList onNavigate={() => setMobileOpen(false)} />
+                  <NavList items={visibleNavItems} onNavigate={() => setMobileOpen(false)} />
                 </div>
               </SheetContent>
             </Sheet>
@@ -174,25 +214,27 @@ export function AppLayout() {
                 </TooltipTrigger>
                 <TooltipContent>Quét mã QR bộ game</TooltipContent>
               </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="relative rounded-xl"
-                    asChild
-                    aria-label="Thông báo"
-                  >
-                    <Link to="/app/notifications">
-                      <Bell className="h-4.5 w-4.5" />
-                      {unread > 0 ? (
-                        <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" />
-                      ) : null}
-                    </Link>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Trung tâm thông báo</TooltipContent>
-              </Tooltip>
+              {isOwner ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="relative rounded-xl"
+                      asChild
+                      aria-label="Thông báo"
+                    >
+                      <Link to="/app/notifications">
+                        <Bell className="h-4.5 w-4.5" />
+                        {unread > 0 ? (
+                          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" />
+                        ) : null}
+                      </Link>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Trung tâm thông báo</TooltipContent>
+                </Tooltip>
+              ) : null}
               <div className="ml-1 flex items-center gap-2">
                 <Avatar className="h-9 w-9">
                   <AvatarFallback className="bg-primary/12 text-xs font-semibold text-primary">
@@ -211,13 +253,13 @@ export function AppLayout() {
         </header>
 
         <main key={pathname} className="page-enter px-4 pb-24 pt-6 sm:px-6 lg:pb-10">
-          <Outlet />
+          {hideRouteContent ? null : <Outlet />}
         </main>
       </div>
 
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 backdrop-blur lg:hidden">
-        <div className="grid grid-cols-5">
-          {MOBILE_ITEMS.map((item) => {
+        <div className={cn("grid", isOwner ? "grid-cols-5" : "grid-cols-4")}>
+          {mobileItems.map((item) => {
             const active = item.exact ? pathname === item.to : pathname.startsWith(item.to);
             return (
               <Link
