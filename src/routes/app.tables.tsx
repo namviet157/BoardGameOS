@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useStore } from "@/lib/bgos/store";
 import { minutesSince } from "@/lib/bgos/helpers";
 import type { TableStatus } from "@/lib/bgos/types";
+import { useMinuteRefresh } from "@/hooks/use-minute-refresh";
 
 export const Route = createFileRoute("/app/tables")({
   head: () => ({
@@ -29,6 +30,7 @@ const STATUS_OPTIONS: { value: TableStatus; label: string }[] = [
 ];
 
 function TablesPage() {
+  useMinuteRefresh();
   const { tables, games, staff, setTableStatus, updateTable, endSession, deliverGame } = useStore();
 
   return (

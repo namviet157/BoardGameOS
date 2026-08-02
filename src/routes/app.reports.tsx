@@ -31,10 +31,10 @@ function ReportsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Báo cáo" description="Tổng hợp hoạt động 14 ngày gần nhất của quán." />
+      <PageHeader title="Báo cáo" description="Tổng hợp hoạt động 30 ngày gần nhất của quán." />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard icon={Activity} label="Tổng lượt chơi" value={String(totalSessions)} hint="14 ngày gần nhất" />
+        <StatCard icon={Activity} label="Tổng lượt chơi" value={String(totalSessions)} hint="30 ngày gần nhất" />
         <StatCard icon={LayoutGrid} label="Tỉ lệ dùng bàn" value={`${avgUsage}%`} hint="Trung bình mỗi ngày" />
         <StatCard icon={Clock} label="Thời lượng TB" value={`${avgMinutes} phút`} hint="Mỗi phiên chơi" />
         <StatCard icon={AlertTriangle} label="Sự cố linh kiện" value={String(totalIncidents)} hint="Cần theo dõi" />

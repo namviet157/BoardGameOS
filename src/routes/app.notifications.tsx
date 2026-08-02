@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useStore } from "@/lib/bgos/store";
 import { timeAgo } from "@/lib/bgos/helpers";
 import type { AppNotification } from "@/lib/bgos/types";
+import { useMinuteRefresh } from "@/hooks/use-minute-refresh";
 
 export const Route = createFileRoute("/app/notifications")({
   head: () => ({
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/app/notifications")({
 });
 
 function NotificationsPage() {
+  useMinuteRefresh();
   const { notifications, markNotification, markAllRead } = useStore();
   const groups: { key: string; label: string; items: AppNotification[] }[] = [
     { key: "all", label: "Tất cả", items: notifications },

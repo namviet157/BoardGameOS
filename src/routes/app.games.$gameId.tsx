@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useStore } from "@/lib/bgos/store";
 import { GAME_STATUS_LABEL, playersLabel, timeAgo } from "@/lib/bgos/helpers";
 import type { GameStatus } from "@/lib/bgos/types";
+import { useMinuteRefresh } from "@/hooks/use-minute-refresh";
 
 export const Route = createFileRoute("/app/games/$gameId")({
   head: () => ({
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/app/games/$gameId")({
 });
 
 function GameDetail() {
+  useMinuteRefresh();
   const { gameId } = useParams({ from: "/app/games/$gameId" });
   const { games, tables, setGameStatus, saveComponents, deliverGame, updateGame, staff } = useStore();
   const game = games.find((g) => g.id === gameId);

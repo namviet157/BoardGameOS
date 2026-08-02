@@ -11,6 +11,24 @@ import type {
 
 const now = new Date();
 const iso = (minutesAgo: number) => new Date(now.getTime() - minutesAgo * 60000).toISOString();
+const vietnamDateFormatter = new Intl.DateTimeFormat("en-US", {
+  timeZone: "Asia/Ho_Chi_Minh",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  weekday: "short",
+});
+
+function vietnamCalendarDay(date: Date) {
+  const parts = Object.fromEntries(
+    vietnamDateFormatter.formatToParts(date).map((part) => [part.type, part.value]),
+  );
+
+  return {
+    date: `${parts.year}-${parts.month}-${parts.day}`,
+    weekend: parts.weekday === "Sat" || parts.weekday === "Sun",
+  };
+}
 
 const comp = (name: string, qty: number, ok = true, missingQty = 0, note?: string) => ({
   id: `${name}-${qty}`.replace(/\s+/g, "-").toLowerCase(),
@@ -559,10 +577,10 @@ export const seedNotifications: AppNotification[] = [
 
 export const seedReports: ReportDay[] = Array.from({ length: 30 }).map((_, i) => {
   const d = new Date(now.getTime() - (29 - i) * 86400000);
-  const weekend = d.getDay() === 0 || d.getDay() === 6;
+  const { date, weekend } = vietnamCalendarDay(d);
   const base = weekend ? 38 : 22;
   return {
-    date: d.toISOString().slice(0, 10),
+    date,
     sessions: base + ((i * 7) % 11),
     incidents: (i * 3) % 4,
     tableUsage: Math.min(96, (weekend ? 74 : 52) + ((i * 5) % 18)),

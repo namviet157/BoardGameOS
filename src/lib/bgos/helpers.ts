@@ -44,12 +44,12 @@ export const TONE_CLASS: Record<number, string> = {
 
 export function timeAgo(iso: string): string {
   const diff = Math.max(0, Date.now() - new Date(iso).getTime());
-  const m = Math.round(diff / 60000);
+  const m = Math.floor(diff / 60000);
   if (m < 1) return "vừa xong";
   if (m < 60) return `${m} phút trước`;
-  const h = Math.round(m / 60);
+  const h = Math.floor(m / 60);
   if (h < 24) return `${h} giờ trước`;
-  return `${Math.round(h / 24)} ngày trước`;
+  return `${Math.floor(h / 24)} ngày trước`;
 }
 
 export function formatTime(iso?: string): string {
@@ -63,7 +63,7 @@ export function formatDate(iso: string): string {
 
 export function minutesSince(iso?: string): number {
   if (!iso) return 0;
-  return Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+  return Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 60000));
 }
 
 export function playersLabel(min: number, max: number) {

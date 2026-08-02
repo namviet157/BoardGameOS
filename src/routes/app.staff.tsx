@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useStore } from "@/lib/bgos/store";
 import { timeAgo } from "@/lib/bgos/helpers";
 import type { StaffRole } from "@/lib/bgos/types";
+import { useMinuteRefresh } from "@/hooks/use-minute-refresh";
 
 export const Route = createFileRoute("/app/staff")({
   head: () => ({
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/app/staff")({
 const ROLES: StaffRole[] = ["Chủ quán", "Quản lý", "Thu ngân", "Nhân viên phục vụ", "Nhân viên kho"];
 
 function StaffPage() {
+  useMinuteRefresh();
   const { staff, addStaff, updateStaff } = useStore();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", role: "Nhân viên phục vụ" as StaffRole, shift: "Ca sáng (08:00 - 16:00)" });

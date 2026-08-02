@@ -13,6 +13,7 @@ import { TableStatusBadge } from "@/components/bgos/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/lib/bgos/store";
 import { TABLE_STATUS_LABEL, minutesSince, timeAgo } from "@/lib/bgos/helpers";
+import { useMinuteRefresh } from "@/hooks/use-minute-refresh";
 
 export const Route = createFileRoute("/app/")({
   head: () => ({
@@ -27,6 +28,7 @@ export const Route = createFileRoute("/app/")({
 });
 
 function Overview() {
+  useMinuteRefresh();
   const { games, tables, activities } = useStore();
 
   const inUse = games.filter((g) => g.status === "in_use").length;

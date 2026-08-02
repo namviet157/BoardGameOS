@@ -24,7 +24,7 @@ import type {
   Transaction,
 } from "./types";
 
-const KEY = "boardgameos-state-v1";
+const KEY = "boardgameos-state-v2";
 const SESSION_KEY = "boardgameos-session-v1";
 
 interface State {
@@ -277,6 +277,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       updateTable: (id, patch) =>
         setState((s) => ({ ...s, tables: s.tables.map((t) => (t.id === id ? { ...t, ...patch } : t)) })),
       setTableStatus: (id, status) => {
+        const at = new Date().toISOString();
+        const tracksSession = status === "playing" || status === "support" || status === "issue";
         setState((s) => ({
           ...s,
           tables: s.tables.map((t) =>
@@ -286,7 +288,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
                   status,
                   guests: status === "empty" || status === "cleaning" ? 0 : t.guests,
                   gameId: status === "empty" ? undefined : t.gameId,
-                  startedAt: status === "empty" ? undefined : t.startedAt,
+                  startedAt: tracksSession ? (t.startedAt ?? at) : undefined,
                 }
               : t,
           ),

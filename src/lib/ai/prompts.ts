@@ -19,8 +19,17 @@ export function buildOperationsChatPrompt(input: {
   history: unknown;
   data: unknown;
 }) {
+  const now = new Date();
+  const vietnamTime = new Intl.DateTimeFormat("vi-VN", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    dateStyle: "full",
+    timeStyle: "long",
+  }).format(now);
+
   return `
-Thời điểm hiện tại: ${new Date().toISOString()}
+Thời điểm UTC hiện tại: ${now.toISOString()}
+Thời điểm hiện tại tại quán: ${vietnamTime}
+Múi giờ vận hành: Asia/Ho_Chi_Minh (UTC+7)
 Trang người dùng đang xem: ${input.currentPath}
 
 HỘI THOẠI GẦN ĐÂY:
