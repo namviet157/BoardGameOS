@@ -1,21 +1,29 @@
 import { useState } from "react";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { ArrowLeft, QrCode, Wrench } from "lucide-react";
+import { ArrowLeft, ClipboardCheck, Pencil, QrCode, Wrench } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader, EmptyState } from "@/components/bgos/StatCard";
 import { GameThumb } from "@/components/bgos/GameThumb";
 import { GameImagePicker } from "@/components/bgos/GameImagePicker";
+import { GameChecklistEditor } from "@/components/bgos/GameChecklistEditor";
 import { GameStatusBadge } from "@/components/bgos/StatusBadge";
 import { ConfirmActionDialog } from "@/components/bgos/ConfirmActionDialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useStore } from "@/lib/bgos/store";
 import { GAME_STATUS_LABEL, playersLabel, timeAgo } from "@/lib/bgos/helpers";
 import type { GameStatus } from "@/lib/bgos/types";
+import {
+  buildGameComponents,
+  toGameComponentDrafts,
+  validateGameComponentDrafts,
+  type GameComponentDraft,
+} from "@/lib/bgos/game-checklist";
 import { useMinuteRefresh } from "@/hooks/use-minute-refresh";
 
 export const Route = createFileRoute("/app/games/$gameId")({
@@ -39,6 +47,8 @@ function GameDetail() {
   const [note, setNote] = useState(game?.notes ?? "");
   const [maintenanceOpen, setMaintenanceOpen] = useState(false);
   const [removeImageOpen, setRemoveImageOpen] = useState(false);
+  const [checklistOpen, setChecklistOpen] = useState(false);
+  const [checklistDrafts, setChecklistDrafts] = useState<GameComponentDraft[]>([]);
 
   if (!game) {
     return (
@@ -57,6 +67,22 @@ function GameDetail() {
       game.components.map((c) => (c.id === id ? { ...c, ok, missingQty: ok ? 0 : c.missingQty || 1 } : c)),
     );
     toast.success("Đã cập nhật checklist linh kiện");
+  };
+
+  const openChecklistEditor = () => {
+    setChecklistDrafts(toGameComponentDrafts(game.components));
+    setChecklistOpen(true);
+  };
+
+  const saveChecklist = () => {
+    const checklistError = validateGameComponentDrafts(checklistDrafts);
+    if (checklistError) {
+      toast.error(checklistError);
+      return;
+    }
+    updateGame(game.id, { components: buildGameComponents(checklistDrafts) });
+    setChecklistOpen(false);
+    toast.success("Đã lưu danh sách linh kiện chuẩn");
   };
 
   return (
@@ -153,38 +179,52 @@ function GameDetail() {
 
             <TabsContent value="components" className="card-soft mt-4 p-5">
               {game.components.length === 0 ? (
-                <EmptyState icon={QrCode} title="Chưa có checklist" description="Bổ sung danh sách linh kiện để nhân viên kiểm tra khi nhận lại game." />
+                <EmptyState
+                  icon={ClipboardCheck}
+                  title="Chưa có checklist"
+                  description="Bổ sung danh sách linh kiện chuẩn để nhân viên kiểm tra khi nhận lại game."
+                  action={<Button className="rounded-xl" onClick={openChecklistEditor}>Tạo checklist</Button>}
+                />
               ) : (
-                <ul className="space-y-3">
-                  {game.components.map((c) => (
-                    <li key={c.id} className="flex items-center gap-3 rounded-xl border border-border p-3">
-                      <Checkbox checked={c.ok} onCheckedChange={(v) => toggleComponent(c.id, Boolean(v))} />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">{c.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          Số lượng chuẩn: {c.qty}
-                          {!c.ok && c.missingQty ? ` · Thiếu ${c.missingQty}` : ""}
-                          {c.note ? ` · ${c.note}` : ""}
-                        </p>
-                      </div>
-                      {!c.ok ? (
-                        <Input
-                          type="number"
-                          min={1}
-                          value={c.missingQty}
-                          className="w-20 rounded-lg"
-                          onChange={(e) =>
-                            saveComponents(game.id, game.components.map((x) => (x.id === c.id ? { ...x, missingQty: Number(e.target.value) } : x)))
-                          }
-                        />
-                      ) : null}
-                    </li>
-                  ))}
-                </ul>
+                <>
+                  <ul className="space-y-3">
+                    {game.components.map((c) => (
+                      <li key={c.id} className="flex items-center gap-3 rounded-xl border border-border p-3">
+                        <Checkbox checked={c.ok} onCheckedChange={(v) => toggleComponent(c.id, Boolean(v))} />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{c.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Số lượng chuẩn: {c.qty}
+                            {!c.ok && c.missingQty ? ` · Thiếu ${c.missingQty}` : ""}
+                            {c.note ? ` · ${c.note}` : ""}
+                          </p>
+                        </div>
+                        {!c.ok ? (
+                          <Input
+                            type="number"
+                            min={1}
+                            value={c.missingQty}
+                            className="w-20 rounded-lg"
+                            onChange={(e) =>
+                              saveComponents(game.id, game.components.map((x) => (x.id === c.id ? { ...x, missingQty: Number(e.target.value) } : x)))
+                            }
+                          />
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                </>
               )}
-              <Button asChild variant="outline" className="mt-4 rounded-xl">
-                <Link to="/app/checklist">Mở trang kiểm tra linh kiện</Link>
-              </Button>
+              {game.components.length > 0 ? (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Button variant="outline" className="rounded-xl" onClick={openChecklistEditor}>
+                    <Pencil /> Chỉnh sửa checklist
+                  </Button>
+                  <Button asChild variant="outline" className="rounded-xl">
+                    <Link to="/app/checklist">Mở trang kiểm tra linh kiện</Link>
+                  </Button>
+                </div>
+              ) : null}
             </TabsContent>
 
             <TabsContent value="history" className="card-soft mt-4 p-5">
@@ -226,6 +266,20 @@ function GameDetail() {
           </Tabs>
         </div>
       </div>
+
+      <Dialog open={checklistOpen} onOpenChange={setChecklistOpen}>
+        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>{game.components.length === 0 ? "Tạo checklist linh kiện" : "Chỉnh sửa checklist linh kiện"}</DialogTitle>
+            <DialogDescription>Quản lý tên và số lượng chuẩn của các linh kiện trong bộ game.</DialogDescription>
+          </DialogHeader>
+          <GameChecklistEditor value={checklistDrafts} onChange={setChecklistDrafts} />
+          <DialogFooter>
+            <Button type="button" variant="outline" className="rounded-xl" onClick={() => setChecklistOpen(false)}>Hủy</Button>
+            <Button type="button" className="rounded-xl" onClick={saveChecklist}>Lưu checklist</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <ConfirmActionDialog
         open={maintenanceOpen}

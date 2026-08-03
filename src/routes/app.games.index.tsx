@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { PageHeader, EmptyState } from "@/components/bgos/StatCard";
 import { GameThumb } from "@/components/bgos/GameThumb";
 import { GameImagePicker } from "@/components/bgos/GameImagePicker";
+import { GameChecklistEditor } from "@/components/bgos/GameChecklistEditor";
 import { GameStatusBadge } from "@/components/bgos/StatusBadge";
 import { ConfirmActionDialog } from "@/components/bgos/ConfirmActionDialog";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,11 @@ import { useStore } from "@/lib/bgos/store";
 import { GAME_STATUS_LABEL, playersLabel } from "@/lib/bgos/helpers";
 import { GAME_CATEGORIES } from "@/lib/bgos/mock";
 import type { Difficulty, GameStatus } from "@/lib/bgos/types";
+import {
+  buildGameComponents,
+  validateGameComponentDrafts,
+  type GameComponentDraft,
+} from "@/lib/bgos/game-checklist";
 
 export const Route = createFileRoute("/app/games/")({
   head: () => ({
@@ -238,12 +244,16 @@ function AddGameDialog({
   const [imageDataUrl, setImageDataUrl] = useState<string>();
   const [imageFileName, setImageFileName] = useState("");
   const [imageProcessing, setImageProcessing] = useState(false);
+  const [components, setComponents] = useState<GameComponentDraft[]>([]);
+  const [emptyChecklistOpen, setEmptyChecklistOpen] = useState(false);
 
   const resetForm = () => {
     setForm(emptyForm());
     setImageDataUrl(undefined);
     setImageFileName("");
     setImageProcessing(false);
+    setComponents([]);
+    setEmptyChecklistOpen(false);
   };
 
   const handleOpenChange = (nextOpen: boolean) => {
@@ -251,23 +261,18 @@ function AddGameDialog({
     onOpenChange(nextOpen);
   };
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.name.trim() || !form.code.trim() || !form.location.trim()) {
-      toast.error("Vui lòng nhập tên game, mã game và vị trí lưu trữ.");
-      return;
-    }
+  const saveGame = () => {
     onAdd({
-      name: form.name,
-      code: form.code,
+      name: form.name.trim(),
+      code: form.code.trim(),
       category: form.category,
       minPlayers: Number(form.minPlayers),
       maxPlayers: Number(form.maxPlayers),
       duration: Number(form.duration),
       difficulty: form.difficulty,
       status: "available" as GameStatus,
-      location: form.location,
-      description: form.description,
+      location: form.location.trim(),
+      description: form.description.trim(),
       age: 8,
       interaction: "Vừa",
       mode: "Cạnh tranh",
@@ -275,7 +280,7 @@ function AddGameDialog({
       emoji: "🎲",
       tone: 2,
       imageDataUrl,
-      components: [],
+      components: buildGameComponents(components),
       notes: "",
     });
     toast.success("Đã thêm game mới vào kho");
@@ -283,12 +288,31 @@ function AddGameDialog({
     onOpenChange(false);
   };
 
+  const submit = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!form.name.trim() || !form.code.trim() || !form.location.trim()) {
+      toast.error("Vui lòng nhập tên game, mã game và vị trí lưu trữ.");
+      return;
+    }
+    const checklistError = validateGameComponentDrafts(components);
+    if (checklistError) {
+      toast.error(checklistError);
+      return;
+    }
+    if (components.length === 0) {
+      setEmptyChecklistOpen(true);
+      return;
+    }
+    saveGame();
+  };
+
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto rounded-2xl">
+    <>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto rounded-2xl">
         <DialogHeader>
           <DialogTitle>Thêm game mới</DialogTitle>
-          <DialogDescription>Nhập thông tin cơ bản, bạn có thể bổ sung checklist linh kiện sau.</DialogDescription>
+          <DialogDescription>Nhập thông tin game và khai báo danh sách linh kiện chuẩn nếu đã có.</DialogDescription>
         </DialogHeader>
         <form className="grid gap-3 sm:grid-cols-2" onSubmit={submit}>
           <div className="sm:col-span-2">
@@ -350,12 +374,29 @@ function AddGameDialog({
             <Label htmlFor="g-desc">Mô tả ngắn</Label>
             <Textarea id="g-desc" className="mt-1.5 rounded-xl" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
           </div>
+          <div className="space-y-2 sm:col-span-2">
+            <div>
+              <Label>Checklist linh kiện</Label>
+              <p className="text-xs text-muted-foreground">Danh sách chuẩn để nhân viên đối chiếu khi nhận lại game.</p>
+            </div>
+            <GameChecklistEditor value={components} onChange={setComponents} />
+          </div>
           <DialogFooter className="sm:col-span-2">
             <Button type="button" variant="outline" className="rounded-xl" onClick={() => handleOpenChange(false)}>Hủy</Button>
             <Button type="submit" className="rounded-xl" disabled={imageProcessing}>Lưu game</Button>
           </DialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+      <ConfirmActionDialog
+        open={emptyChecklistOpen}
+        onOpenChange={setEmptyChecklistOpen}
+        title="Game chưa có checklist linh kiện"
+        description="Bạn vẫn có thể tạo game và bổ sung danh sách linh kiện chuẩn tại trang chi tiết sau."
+        cancelLabel="Quay lại"
+        confirmLabel="Vẫn lưu game"
+        onConfirm={saveGame}
+      />
+    </>
   );
 }

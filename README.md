@@ -44,7 +44,7 @@ Dữ liệu nghiệp vụ được lưu trên trình duyệt bằng `localStorag
 
 - Dashboard tổng quan game, bàn chơi, sự cố, cảnh báo cần xử lý và hoạt động gần đây.
 - Kho game: tìm kiếm, lọc, thêm game, xem chi tiết, cập nhật trạng thái và QR mô phỏng.
-- Quản lý checklist linh kiện, lịch sử giao nhận, sự cố và ghi chú của từng game.
+- Khai báo và chỉnh sửa danh sách linh kiện chuẩn; kiểm tra đủ/thiếu khi nhận lại game.
 - Quản lý bàn: trạng thái, số khách, game đang chơi, nhân viên phụ trách và thời gian phiên.
 - Quy trình giao game, nhận lại game và chuyển game sang bảo trì.
 - Bộ lọc tư vấn game theo số người, thời lượng, thể loại, độ tuổi, độ khó, kiểu chơi và mức tương tác.
@@ -228,9 +228,10 @@ Nhân viên sử dụng các chức năng vận hành:
 
 1. Mở **Kho game**.
 2. Tìm kiếm hoặc lọc theo thể loại, trạng thái và số người chơi.
-3. Bấm **Thêm game mới** để tạo một game trong dữ liệu demo; có thể chọn ảnh bìa JPG, PNG hoặc WebP từ máy.
-4. Bấm **Chi tiết** để xem checklist, lịch sử, sự cố, ghi chú hoặc thay/xóa ảnh bìa.
-5. Dùng nút bảo trì để chuyển game sang bảo trì sau khi xác nhận.
+3. Bấm **Thêm game mới** để tạo game, chọn ảnh bìa và khai báo checklist linh kiện nếu đã có.
+4. Nếu bỏ trống checklist, xác nhận lưu và bổ sung sau tại trang chi tiết game.
+5. Bấm **Chi tiết** để tạo/chỉnh sửa danh sách linh kiện chuẩn, xem lịch sử, sự cố, ghi chú hoặc thay/xóa ảnh bìa.
+6. Dùng nút bảo trì để chuyển game sang bảo trì sau khi xác nhận.
 
 ### 4. Quản lý bàn và phiên chơi
 
@@ -260,6 +261,8 @@ Tab **Nhận lại game**:
 QR scanner hiện là mô phỏng: chọn một game trong dialog thay vì sử dụng camera thật.
 
 ### 6. Kiểm tra linh kiện
+
+Danh sách linh kiện chuẩn được cấu hình khi thêm game hoặc tại trang chi tiết. Trang kiểm tra linh kiện chỉ dùng để đối chiếu tình trạng thực tế.
 
 1. Mở **Kiểm tra linh kiện**.
 2. Chọn game.

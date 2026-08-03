@@ -17,6 +17,7 @@ interface ConfirmActionDialogProps {
   title: string;
   description: string;
   confirmLabel: string;
+  cancelLabel?: string;
   onConfirm: () => void;
   destructive?: boolean;
 }
@@ -27,6 +28,7 @@ export function ConfirmActionDialog({
   title,
   description,
   confirmLabel,
+  cancelLabel = "Hủy",
   onConfirm,
   destructive = false,
 }: ConfirmActionDialogProps) {
@@ -38,7 +40,7 @@ export function ConfirmActionDialog({
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Hủy</AlertDialogCancel>
+          <AlertDialogCancel>{cancelLabel}</AlertDialogCancel>
           <AlertDialogAction
             className={cn(destructive && buttonVariants({ variant: "destructive" }))}
             onClick={onConfirm}
