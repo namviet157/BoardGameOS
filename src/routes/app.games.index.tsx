@@ -4,6 +4,7 @@ import { Boxes, Plus, QrCode, Search, Wrench } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader, EmptyState } from "@/components/bgos/StatCard";
 import { GameThumb } from "@/components/bgos/GameThumb";
+import { GameImagePicker } from "@/components/bgos/GameImagePicker";
 import { GameStatusBadge } from "@/components/bgos/StatusBadge";
 import { ConfirmActionDialog } from "@/components/bgos/ConfirmActionDialog";
 import { Button } from "@/components/ui/button";
@@ -123,7 +124,7 @@ function GamesPage() {
                   <TableRow key={g.id}>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <GameThumb emoji={g.emoji} tone={g.tone} size="sm" />
+                        <GameThumb emoji={g.emoji} tone={g.tone} imageDataUrl={g.imageDataUrl} alt={`Ảnh bìa ${g.name}`} size="sm" />
                         <span className="font-medium">{g.name}</span>
                       </div>
                     </TableCell>
@@ -161,7 +162,7 @@ function GamesPage() {
           <div className="grid gap-3 sm:grid-cols-2 lg:hidden">
             {filtered.map((g) => (
               <Link key={g.id} to="/app/games/$gameId" params={{ gameId: g.id }} className="card-soft card-hover flex gap-3 p-4">
-                <GameThumb emoji={g.emoji} tone={g.tone} />
+                <GameThumb emoji={g.emoji} tone={g.tone} imageDataUrl={g.imageDataUrl} alt={`Ảnh bìa ${g.name}`} />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-2">
                     <p className="font-medium">{g.name}</p>
@@ -222,7 +223,7 @@ function AddGameDialog({
   onOpenChange: (v: boolean) => void;
   onAdd: ReturnType<typeof useStore>["addGame"];
 }) {
-  const [form, setForm] = useState({
+  const emptyForm = () => ({
     name: "",
     code: "",
     category: GAME_CATEGORIES[0],
@@ -233,6 +234,22 @@ function AddGameDialog({
     location: "",
     description: "",
   });
+  const [form, setForm] = useState(emptyForm);
+  const [imageDataUrl, setImageDataUrl] = useState<string>();
+  const [imageFileName, setImageFileName] = useState("");
+  const [imageProcessing, setImageProcessing] = useState(false);
+
+  const resetForm = () => {
+    setForm(emptyForm());
+    setImageDataUrl(undefined);
+    setImageFileName("");
+    setImageProcessing(false);
+  };
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) resetForm();
+    onOpenChange(nextOpen);
+  };
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -257,21 +274,40 @@ function AddGameDialog({
       beginnerFriendly: true,
       emoji: "🎲",
       tone: 2,
+      imageDataUrl,
       components: [],
       notes: "",
     });
     toast.success("Đã thêm game mới vào kho");
+    resetForm();
     onOpenChange(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg rounded-2xl">
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto rounded-2xl">
         <DialogHeader>
           <DialogTitle>Thêm game mới</DialogTitle>
           <DialogDescription>Nhập thông tin cơ bản, bạn có thể bổ sung checklist linh kiện sau.</DialogDescription>
         </DialogHeader>
         <form className="grid gap-3 sm:grid-cols-2" onSubmit={submit}>
+          <div className="sm:col-span-2">
+            <Label>Ảnh bìa</Label>
+            <GameImagePicker
+              className="mt-1.5"
+              imageDataUrl={imageDataUrl}
+              fileName={imageFileName}
+              onImageChange={(nextImage, nextFileName) => {
+                setImageDataUrl(nextImage);
+                setImageFileName(nextFileName);
+              }}
+              onRemove={() => {
+                setImageDataUrl(undefined);
+                setImageFileName("");
+              }}
+              onProcessingChange={setImageProcessing}
+            />
+          </div>
           <div className="sm:col-span-2">
             <Label htmlFor="g-name">Tên game *</Label>
             <Input id="g-name" className="mt-1.5 rounded-xl" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
@@ -315,8 +351,8 @@ function AddGameDialog({
             <Textarea id="g-desc" className="mt-1.5 rounded-xl" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
           </div>
           <DialogFooter className="sm:col-span-2">
-            <Button type="button" variant="outline" className="rounded-xl" onClick={() => onOpenChange(false)}>Hủy</Button>
-            <Button type="submit" className="rounded-xl">Lưu game</Button>
+            <Button type="button" variant="outline" className="rounded-xl" onClick={() => handleOpenChange(false)}>Hủy</Button>
+            <Button type="submit" className="rounded-xl" disabled={imageProcessing}>Lưu game</Button>
           </DialogFooter>
         </form>
       </DialogContent>

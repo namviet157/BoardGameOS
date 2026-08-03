@@ -156,13 +156,6 @@ GEMINI_MODEL=gemini-3.6-flash
 - `GEMINI_MODEL`: model Gemini muốn sử dụng. Nếu bỏ trống, code mặc định dùng `gemini-3.6-flash`.
 - Nếu model trên không khả dụng với tài khoản Google hiện tại, thay bằng model được Google AI Studio cung cấp cho API key đó.
 
-Lưu ý bảo mật:
-
-- Không commit `.env.local` lên Git.
-- Không đặt key trong biến bắt đầu bằng `VITE_`, vì biến đó có thể được đóng gói vào frontend.
-- `.gitignore` đã loại trừ các file có đuôi `.local`.
-- Sau khi thay đổi biến môi trường, cần khởi động lại dev server.
-
 <a id="chay-thu-local"></a>
 
 ## ▶️ Chạy thử ở local
@@ -173,23 +166,10 @@ Khởi động development server:
 npm run dev
 ```
 
-Mở URL được in trong terminal, thường là một trong các địa chỉ:
+Mở URL được in trong terminal:
 
 ```text
-http://localhost:3000
-http://localhost:5173
-```
-
-Để chỉ định rõ host và port:
-
-```bash
-npm run dev -- --host 127.0.0.1 --port 3000
-```
-
-Sau đó truy cập:
-
-```text
-http://127.0.0.1:3000
+http://localhost:8080/
 ```
 
 <a id="tai-khoan-demo"></a>
@@ -201,9 +181,7 @@ http://127.0.0.1:3000
 | Chủ quán | `owner@boardgameos.vn` | `demo1234` |
 | Nhân viên | `staff@boardgameos.vn` | `demo1234` |
 
-Có thể bấm trực tiếp vào tài khoản mẫu ở cuối trang đăng nhập để điền nhanh thông tin.
-
-Đăng nhập hiện là mô phỏng phục vụ MVP: hệ thống kiểm tra email có trong danh sách nhân viên và tài khoản không bị khóa. Mật khẩu chưa được xác thực bằng backend thật.
+Đăng nhập hiện là mô phỏng phục vụ MVP. Tài khoản chưa được xác thực bằng backend thật.
 
 <a id="phan-quyen-giao-dien"></a>
 
@@ -223,6 +201,7 @@ Chủ quán truy cập được toàn bộ chức năng:
 - Báo cáo.
 - Thông báo.
 - Cài đặt.
+- Chatbot AI.
 
 ### Nhân viên
 
@@ -235,10 +214,6 @@ Nhân viên sử dụng các chức năng vận hành:
 - Kiểm tra linh kiện.
 - Tư vấn game.
 - Chatbot AI.
-
-Nhân viên không thấy và không truy cập được `Báo cáo`, `Thông báo`, `Nhân viên` và `Cài đặt`. Nếu nhập trực tiếp URL của các trang này, hệ thống chuyển về Dashboard và hiển thị cảnh báo.
-
-Đây là phân quyền giao diện dành cho MVP, chưa phải cơ chế authorization backend.
 
 <a id="huong-dan-su-dung"></a>
 
@@ -258,21 +233,19 @@ Nhân viên không thấy và không truy cập được `Báo cáo`, `Thông b�
 3. Có thể nhập tiếng Việt có dấu hoặc không dấu.
 4. Chọn kết quả để chuyển đến màn hình tương ứng.
 
-Kết quả nhân viên chỉ hiển thị với tài khoản Chủ quán. Có thể mở tìm kiếm nhanh bằng `Ctrl + K` trên Windows/Linux hoặc `Cmd + K` trên macOS.
-
 ### 3. Quản lý kho game
 
 1. Mở **Kho game**.
 2. Tìm kiếm hoặc lọc theo thể loại, trạng thái và số người chơi.
-3. Bấm **Thêm game mới** để tạo một game trong dữ liệu demo.
-4. Bấm **Chi tiết** để xem checklist, lịch sử, sự cố và ghi chú.
+3. Bấm **Thêm game mới** để tạo một game trong dữ liệu demo; có thể chọn ảnh bìa JPG, PNG hoặc WebP từ máy.
+4. Bấm **Chi tiết** để xem checklist, lịch sử, sự cố, ghi chú hoặc thay/xóa ảnh bìa.
 5. Dùng nút bảo trì để chuyển game sang bảo trì sau khi xác nhận.
 
 ### 4. Quản lý bàn và phiên chơi
 
 1. Mở **Bàn chơi**.
 2. Chọn trạng thái bàn hoặc gán một game đang có sẵn.
-3. Với bàn trống, bấm **Tạo phiên chơi**.
+3. Với bàn trống, bấm **Gán game cho bàn --> Tạo phiên chơi**.
 4. Với bàn đang hoạt động, bấm **Kết thúc phiên** và xác nhận.
 5. Có thể đánh dấu bàn **Cần hỗ trợ** để phản ánh tình huống vận hành.
 
@@ -310,8 +283,6 @@ QR scanner hiện là mô phỏng: chọn một game trong dialog thay vì sử 
 3. Trang lọc các game phù hợp từ dữ liệu hiện tại.
 4. Chọn bàn và gán game nếu cần.
 
-Trang này sử dụng bộ lọc frontend, không gọi Gemini. Có thể dùng chatbot nếu cần tư vấn bằng ngôn ngữ tự nhiên.
-
 ### 8. Sử dụng chatbot AI
 
 1. Bấm biểu tượng chat ở góc dưới bên phải.
@@ -327,8 +298,6 @@ Ví dụ câu hỏi:
 - `Gợi ý game có sẵn cho 6 người, dưới 30 phút và dễ học.`
 - `Ba việc nào cần ưu tiên xử lý?`
 
-Chatbot chỉ đọc dữ liệu, không trực tiếp thay đổi store. Hội thoại được giữ khi chuyển trang nhưng sẽ mất khi reload trình duyệt.
-
 ### 9. Quản lý nhân viên
 
 Chức năng chỉ dành cho Chủ quán:
@@ -338,8 +307,6 @@ Chức năng chỉ dành cho Chủ quán:
 - Cập nhật badge quyền tương ứng với vai trò.
 - Khóa tài khoản sau khi xác nhận hoặc mở khóa tài khoản.
 - Không thể thay đổi role hoặc khóa tài khoản Chủ quán đang đăng nhập.
-
-Role mới có hiệu lực với tài khoản nhân viên trong lần đăng nhập tiếp theo.
 
 ### 10. Xem thông báo và báo cáo
 
@@ -366,108 +333,7 @@ Trong **Cài đặt**, Chủ quán có thể:
 
 Khôi phục dữ liệu cần xác nhận và không làm mất session đăng nhập hiện tại.
 
-<a id="du-lieu-localstorage"></a>
-
-## 💾 Dữ liệu và localStorage
-
-| Nội dung | Storage key |
-| --- | --- |
-| Dữ liệu nghiệp vụ | `boardgameos-state-v2` |
-| Session đăng nhập | `boardgameos-session-v1` |
-
-- Mock data nằm tại `src/lib/bgos/mock.ts`.
-- Kiểu dữ liệu nằm tại `src/lib/bgos/types.ts`.
-- Store và các thao tác nghiệp vụ nằm tại `src/lib/bgos/store.tsx`.
-- Sau hydration, mọi thay đổi nghiệp vụ được ghi lại vào `localStorage`.
-- Reload trang không làm mất dữ liệu đã thao tác.
-- Xóa dữ liệu website trong trình duyệt hoặc dùng chức năng khôi phục sẽ đưa ứng dụng về mock data.
-- Dữ liệu chỉ tồn tại trên trình duyệt và thiết bị hiện tại, không đồng bộ giữa các máy.
-
-<a id="kien-truc-chatbot"></a>
-
-## 🧠 Kiến trúc chatbot AI
-
-Luồng xử lý:
-
-```text
-AiChatWidget
-  -> tạo snapshot dữ liệu hiện tại
-  -> gọi TanStack Start server function
-  -> server đọc GEMINI_API_KEY
-  -> Google Gemini trả JSON
-  -> Zod kiểm tra kết quả
-  -> frontend hiển thị câu trả lời và câu hỏi gợi ý
-```
-
-Các file chính:
-
-```text
-src/components/bgos/AiChatWidget.tsx
-src/lib/ai/context.ts
-src/lib/ai/operations-chat.functions.ts
-src/lib/ai/gemini.server.ts
-src/lib/ai/prompts.ts
-src/lib/ai/types.ts
-```
-
-Server function giới hạn lịch sử gửi lên ở 6 tin nhắn gần nhất. Prompt cung cấp thời gian UTC, thời gian Việt Nam `Asia/Ho_Chi_Minh` và toàn bộ snapshot nghiệp vụ hiện tại.
-
 <a id="build-kiem-tra"></a>
-
-## ✅ Build và kiểm tra
-
-Kiểm tra TypeScript:
-
-```bash
-npx tsc --noEmit
-```
-
-Chạy ESLint:
-
-```bash
-npm run lint
-```
-
-Build production:
-
-```bash
-npm run build
-```
-
-Preview bản build:
-
-```bash
-npm run preview
-```
-
-Các script có sẵn:
-
-| Lệnh | Mô tả |
-| --- | --- |
-| `npm run dev` | Chạy development server |
-| `npm run build` | Build production bằng Vite và Nitro |
-| `npm run build:dev` | Build với development mode |
-| `npm run preview` | Preview bản build |
-| `npm run lint` | Kiểm tra ESLint |
-| `npm run format` | Format source bằng Prettier |
-
-<a id="deploy-vercel"></a>
-
-## 🚀 Deploy lên Vercel
-
-Project đã cấu hình Nitro preset `vercel` trong `vite.config.ts`, nên frontend và TanStack server function được deploy cùng một project.
-
-1. Push source code lên GitHub.
-2. Import repository vào Vercel.
-3. Trong **Project Settings > Environment Variables**, thêm:
-   - `GEMINI_API_KEY`
-   - `GEMINI_MODEL`
-4. Chọn environment cần dùng: Production, Preview và Development.
-5. Deploy hoặc Redeploy project.
-
-Không upload `.env.local` lên Vercel. Vercel đọc biến môi trường được khai báo trong Project Settings và tạo serverless function từ output Nitro khi build.
-
-<a id="cau-truc-thu-muc"></a>
 
 ## 📁 Cấu trúc thư mục
 
@@ -517,54 +383,3 @@ Không chỉnh sửa thủ công `src/routeTree.gen.ts` vì file này được T
 | `/app/reports` | Báo cáo | Chủ quán |
 | `/app/notifications` | Trung tâm thông báo | Chủ quán |
 | `/app/settings` | Cài đặt | Chủ quán |
-
-<a id="xu-ly-loi"></a>
-
-## 🔧 Xử lý lỗi thường gặp
-
-### Chatbot báo không phản hồi
-
-Kiểm tra:
-
-- `.env.local` đã tồn tại ở thư mục gốc.
-- `GEMINI_API_KEY` đúng và còn hoạt động.
-- Dev server đã được khởi động lại sau khi sửa `.env.local`.
-- Model trong `GEMINI_MODEL` đang khả dụng với API key.
-
-### Gemini trả lỗi model không tồn tại hoặc không khả dụng
-
-Thay `GEMINI_MODEL` trong `.env.local` bằng model được Google AI Studio cung cấp cho tài khoản, sau đó khởi động lại server.
-
-### Cổng local đang được sử dụng
-
-Chạy project ở cổng khác:
-
-```bash
-npm run dev -- --port 3001
-```
-
-### Muốn đưa dữ liệu demo về ban đầu
-
-Đăng nhập bằng tài khoản Chủ quán, mở **Cài đặt > Dữ liệu > Khôi phục dữ liệu mẫu**.
-
-<a id="gioi-han-mvp"></a>
-
-## ⚠️ Giới hạn của MVP
-
-- Không có database và không đồng bộ dữ liệu giữa nhiều trình duyệt/thiết bị.
-- Đăng nhập và phân quyền chỉ phục vụ demo giao diện, chưa bảo mật bằng backend.
-- QR scanner, tải ảnh minh chứng và in QR là mô phỏng.
-- Các công tắc cấu hình thông báo hiện là phần giao diện định hướng cho phiên bản tương lai.
-- Dữ liệu báo cáo là mock data 30 ngày; bộ lọc 7/14 ngày áp dụng cho KPI và biểu đồ theo ngày.
-- Top game và cơ cấu thể loại luôn dùng số liệu 30 ngày.
-- Chatbot cần internet, Gemini API key hợp lệ và không lưu hội thoại sau khi reload.
-- Chatbot chỉ đọc snapshot và không thực hiện thao tác thay đổi dữ liệu.
-- Chưa có sao lưu/khôi phục bằng file hoặc cloud; chỉ có khôi phục mock data.
-
-<a id="ghi-chu-phat-trien"></a>
-
-## 🧑‍💻 Ghi chú phát triển
-
-- Project được kết nối với Lovable thông qua `@lovable.dev/vite-tanstack-config`.
-- Không force push, rebase hoặc rewrite lịch sử commit đã được publish vì có thể làm mất lịch sử đồng bộ trên Lovable.
-- Khi mở rộng sang sản phẩm thật, cần bổ sung database, xác thực backend, authorization theo API và lưu lịch sử nghiệp vụ trên server.

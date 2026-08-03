@@ -4,6 +4,7 @@ import { ArrowLeft, QrCode, Wrench } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader, EmptyState } from "@/components/bgos/StatCard";
 import { GameThumb } from "@/components/bgos/GameThumb";
+import { GameImagePicker } from "@/components/bgos/GameImagePicker";
 import { GameStatusBadge } from "@/components/bgos/StatusBadge";
 import { ConfirmActionDialog } from "@/components/bgos/ConfirmActionDialog";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ function GameDetail() {
   const [tableId, setTableId] = useState("");
   const [note, setNote] = useState(game?.notes ?? "");
   const [maintenanceOpen, setMaintenanceOpen] = useState(false);
+  const [removeImageOpen, setRemoveImageOpen] = useState(false);
 
   if (!game) {
     return (
@@ -91,7 +93,17 @@ function GameDetail() {
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-4">
           <div className="card-soft p-5">
-            <GameThumb emoji={game.emoji} tone={game.tone} size="lg" />
+            <GameThumb emoji={game.emoji} tone={game.tone} imageDataUrl={game.imageDataUrl} alt={`Ảnh bìa ${game.name}`} size="lg" />
+            <GameImagePicker
+              className="mt-3"
+              imageDataUrl={game.imageDataUrl}
+              showPreview={false}
+              onImageChange={(imageDataUrl) => {
+                updateGame(game.id, { imageDataUrl });
+                toast.success(game.imageDataUrl ? "Đã thay ảnh bìa" : "Đã tải ảnh bìa");
+              }}
+              onRemove={() => setRemoveImageOpen(true)}
+            />
             <div className="mt-4 flex items-center justify-between">
               <GameStatusBadge status={game.status} />
               <span className="text-sm text-muted-foreground">{game.usage30d} lượt / 30 ngày</span>
@@ -224,6 +236,18 @@ function GameDetail() {
         onConfirm={() => {
           setGameStatus(game.id, "maintenance", "Chuyển sang bảo trì");
           toast.success("Đã chuyển sang bảo trì");
+        }}
+      />
+      <ConfirmActionDialog
+        open={removeImageOpen}
+        onOpenChange={setRemoveImageOpen}
+        title={`Xóa ảnh bìa của ${game.name}?`}
+        description="Ảnh đã lưu sẽ bị xóa và game quay về hình xúc xắc mặc định."
+        confirmLabel="Xóa ảnh"
+        destructive
+        onConfirm={() => {
+          updateGame(game.id, { imageDataUrl: undefined });
+          toast.success("Đã xóa ảnh bìa");
         }}
       />
     </div>

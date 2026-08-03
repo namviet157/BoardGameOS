@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import { QrCode, ScanLine, Check } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/lib/bgos/store";
 import { GameThumb } from "./GameThumb";
@@ -74,7 +80,13 @@ export function QrScanDialog({
               className="h-auto w-full justify-start gap-3 rounded-xl px-3 py-2"
               onClick={() => pick(g.id)}
             >
-              <GameThumb emoji={g.emoji} tone={g.tone} size="sm" />
+              <GameThumb
+                emoji={g.emoji}
+                tone={g.tone}
+                imageDataUrl={g.imageDataUrl}
+                alt={`Ảnh bìa ${g.name}`}
+                size="sm"
+              />
               <span className="text-left">
                 <span className="block text-sm font-medium">{g.name}</span>
                 <span className="block text-xs text-muted-foreground">{g.code}</span>

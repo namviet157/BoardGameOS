@@ -46,6 +46,7 @@ export interface Game {
   beginnerFriendly: boolean;
   emoji: string;
   tone: 1 | 2 | 3 | 4 | 5;
+  imageDataUrl?: string;
   components: GameComponentItem[];
   history: GameHistoryEntry[];
   incidents: GameIncident[];

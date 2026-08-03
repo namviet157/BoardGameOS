@@ -189,7 +189,12 @@ function AdvisorPage() {
           {results.map((game) => (
             <div key={game.id} className="card-soft card-hover flex flex-col p-5">
               <div className="flex items-start gap-3">
-                <GameThumb emoji={game.emoji} tone={game.tone} />
+                <GameThumb
+                  emoji={game.emoji}
+                  tone={game.tone}
+                  imageDataUrl={game.imageDataUrl}
+                  alt={`Ảnh bìa ${game.name}`}
+                />
                 <div className="flex-1">
                   <p className="font-medium">{game.name}</p>
                   <p className="text-xs text-muted-foreground">
