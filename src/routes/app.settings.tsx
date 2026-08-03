@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { ConfirmActionDialog } from "@/components/bgos/ConfirmActionDialog";
@@ -14,7 +14,7 @@ export const Route = createFileRoute("/app/settings")({
   head: () => ({
     meta: [
       { title: "Cài đặt quán — BoardGameOS" },
-      { name: "description", content: "Cấu hình thông tin quán, chi nhánh, tùy chọn thông báo và dữ liệu demo của BoardGameOS." },
+      { name: "description", content: "Cấu hình thông tin quán, tùy chọn thông báo và dữ liệu demo của BoardGameOS." },
       { property: "og:title", content: "Cài đặt quán — BoardGameOS" },
       { property: "og:description", content: "Thiết lập thông tin quán và tùy chọn hệ thống." },
     ],
@@ -25,6 +25,28 @@ export const Route = createFileRoute("/app/settings")({
 function SettingsPage() {
   const { settings, updateSettings, resetData } = useStore();
   const [resetOpen, setResetOpen] = useState(false);
+  const [storeForm, setStoreForm] = useState(() => ({
+    storeName: settings.storeName,
+    hotline: settings.hotline,
+    address: settings.address,
+    openHours: settings.openHours,
+  }));
+
+  useEffect(() => {
+    setStoreForm({
+      storeName: settings.storeName,
+      hotline: settings.hotline,
+      address: settings.address,
+      openHours: settings.openHours,
+    });
+  }, [settings.address, settings.hotline, settings.openHours, settings.storeName]);
+
+  const hasStoreChanges =
+    storeForm.storeName !== settings.storeName ||
+    storeForm.hotline !== settings.hotline ||
+    storeForm.address !== settings.address ||
+    storeForm.openHours !== settings.openHours;
+  const storeFormValid = Object.values(storeForm).every((value) => value.trim().length > 0);
 
   return (
     <div className="space-y-6">
@@ -33,29 +55,34 @@ function SettingsPage() {
       <Tabs defaultValue="store">
         <TabsList className="rounded-xl">
           <TabsTrigger value="store">Thông tin quán</TabsTrigger>
-          <TabsTrigger value="branches">Chi nhánh</TabsTrigger>
           <TabsTrigger value="notify">Thông báo</TabsTrigger>
           <TabsTrigger value="data">Dữ liệu</TabsTrigger>
         </TabsList>
 
         <TabsContent value="store" className="card-soft mt-4 grid gap-4 p-5 sm:grid-cols-2">
-          <Field label="Tên quán" value={settings.storeName} onChange={(v) => updateSettings({ storeName: v })} />
-          <Field label="Hotline" value={settings.hotline} onChange={(v) => updateSettings({ hotline: v })} />
-          <Field label="Địa chỉ" value={settings.address} onChange={(v) => updateSettings({ address: v })} />
-          <Field label="Giờ mở cửa" value={settings.openHours} onChange={(v) => updateSettings({ openHours: v })} />
+          <Field label="Tên quán" value={storeForm.storeName} onChange={(storeName) => setStoreForm((current) => ({ ...current, storeName }))} />
+          <Field label="Hotline" value={storeForm.hotline} onChange={(hotline) => setStoreForm((current) => ({ ...current, hotline }))} />
+          <Field label="Địa chỉ" value={storeForm.address} onChange={(address) => setStoreForm((current) => ({ ...current, address }))} />
+          <Field label="Giờ mở cửa" value={storeForm.openHours} onChange={(openHours) => setStoreForm((current) => ({ ...current, openHours }))} />
           <div className="sm:col-span-2">
-            <Button className="rounded-xl" onClick={() => toast.success("Đã lưu thông tin quán")}>Lưu thay đổi</Button>
+            <Button
+              className="rounded-xl"
+              disabled={!hasStoreChanges || !storeFormValid}
+              onClick={() => {
+                const savedSettings = {
+                  storeName: storeForm.storeName.trim(),
+                  hotline: storeForm.hotline.trim(),
+                  address: storeForm.address.trim(),
+                  openHours: storeForm.openHours.trim(),
+                };
+                updateSettings(savedSettings);
+                setStoreForm(savedSettings);
+                toast.success("Đã lưu thông tin quán");
+              }}
+            >
+              Lưu thay đổi
+            </Button>
           </div>
-        </TabsContent>
-
-        <TabsContent value="branches" className="mt-4 grid gap-4 sm:grid-cols-2">
-          {settings.branches.map((b) => (
-            <div key={b.id} className="card-soft p-5">
-              <p className="font-medium">{b.name}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{b.address}</p>
-              <p className="mt-2 text-sm text-muted-foreground">{b.tables} bàn chơi</p>
-            </div>
-          ))}
         </TabsContent>
 
         <TabsContent value="notify" className="card-soft mt-4 space-y-4 p-5">
