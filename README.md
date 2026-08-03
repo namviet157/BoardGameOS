@@ -44,7 +44,7 @@ Dữ liệu nghiệp vụ được lưu trên trình duyệt bằng `localStorag
 
 - Dashboard tổng quan game, bàn chơi, sự cố, cảnh báo cần xử lý và hoạt động gần đây.
 - Kho game: tìm kiếm, lọc, thêm game, xem chi tiết, cập nhật trạng thái và QR mô phỏng.
-- Khai báo và chỉnh sửa danh sách linh kiện chuẩn; kiểm tra đủ/thiếu khi nhận lại game.
+- Khai báo và chỉnh sửa danh sách linh kiện chuẩn; kiểm tra trạng thái đầy đủ, thiếu hoặc hư hỏng khi nhận lại game.
 - Quản lý bàn: trạng thái, số khách, game đang chơi, nhân viên phụ trách và thời gian phiên.
 - Quy trình giao game, nhận lại game và chuyển game sang bảo trì.
 - Bộ lọc tư vấn game theo số người, thời lượng, thể loại, độ tuổi, độ khó, kiểu chơi và mức tương tác.
@@ -255,8 +255,9 @@ Tab **Giao game**:
 Tab **Nhận lại game**:
 
 1. Chọn game cần nhận lại.
-2. Kiểm tra từng linh kiện.
-3. Hoàn tất nhận game hoặc chuyển sang xử lý sự cố/bảo trì.
+2. Chọn trạng thái **Đầy đủ**, **Thiếu** hoặc **Hư hỏng** cho từng linh kiện.
+3. Nhập chính xác số lượng thiếu hoặc mô tả tình trạng hư hỏng.
+4. Hoàn tất nhận game hoặc chuyển sang xử lý sự cố/bảo trì.
 
 QR scanner hiện là mô phỏng: chọn một game trong dialog thay vì sử dụng camera thật.
 
@@ -266,9 +267,11 @@ Danh sách linh kiện chuẩn được cấu hình khi thêm game hoặc tại 
 
 1. Mở **Kiểm tra linh kiện**.
 2. Chọn game.
-3. Đánh dấu linh kiện đầy đủ hoặc thiếu.
-4. Có thể chọn mức độ sự cố, thêm ghi chú và ảnh minh chứng mô phỏng.
-5. Bấm hoàn tất để cập nhật trạng thái game và lịch sử hoạt động.
+3. Chọn trạng thái đầy đủ, thiếu hoặc hư hỏng cho từng linh kiện.
+4. Nhập số lượng thiếu hoặc mô tả hư hỏng theo tình trạng thực tế.
+5. Chọn mức độ, thêm ghi chú chung nếu có và bấm hoàn tất để cập nhật trạng thái game.
+
+**Chỉnh sửa checklist** dùng để cấu hình tên và số lượng chuẩn. **Kiểm tra linh kiện** dùng để đối chiếu bộ game thực tế, tạo hoặc đóng sự cố và cập nhật trạng thái kho.
 
 ### 7. Tư vấn game cho khách
 

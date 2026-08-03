@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   seedActivities,
   seedGames,
@@ -12,6 +20,7 @@ import {
 import type {
   ActivityItem,
   AppNotification,
+  ComponentInspectionInput,
   Game,
   GameComponentItem,
   GameStatus,
@@ -23,6 +32,7 @@ import type {
   TableStatus,
   Transaction,
 } from "./types";
+import { componentInspectionResult, validateComponentInspection } from "./component-inspection";
 
 const KEY = "boardgameos-state-v2";
 const SESSION_KEY = "boardgameos-session-v1";
@@ -36,6 +46,39 @@ interface State {
   notifications: AppNotification[];
   reports: ReportDay[];
   settings: StoreSettings;
+}
+
+type LegacyComponent = Partial<GameComponentItem> & { ok?: boolean };
+
+function normalizeStoredState(stored: Partial<State>): State {
+  const merged = { ...initialState, ...stored };
+  return {
+    ...merged,
+    games: merged.games.map((game) => ({
+      ...game,
+      components: game.components.map((component) => {
+        const legacy = component as LegacyComponent;
+        const condition =
+          legacy.condition === "ok" ||
+          legacy.condition === "missing" ||
+          legacy.condition === "damaged"
+            ? legacy.condition
+            : legacy.ok === false
+              ? (legacy.missingQty ?? 0) > 0
+                ? "missing"
+                : "damaged"
+              : "ok";
+        return {
+          id: legacy.id ?? uid(),
+          name: legacy.name ?? "Linh kiện",
+          qty: legacy.qty ?? 1,
+          condition,
+          missingQty: condition === "missing" ? (legacy.missingQty ?? 0) : 0,
+          note: condition === "ok" ? undefined : legacy.note,
+        };
+      }),
+    })),
+  };
 }
 
 const initialState: State = {
@@ -57,7 +100,7 @@ interface StoreValue extends State {
   addGame: (game: Omit<Game, "id" | "history" | "incidents" | "usage30d">) => void;
   updateGame: (id: string, patch: Partial<Game>) => void;
   setGameStatus: (id: string, status: GameStatus, note?: string) => void;
-  saveComponents: (id: string, components: GameComponentItem[]) => void;
+  saveComponentInspection: (input: ComponentInspectionInput) => void;
   deliverGame: (gameId: string, tableId: string, staffId: string, guests?: number) => void;
   returnGame: (gameId: string, status: GameStatus, note?: string) => void;
   updateTable: (id: string, patch: Partial<PlayTable>) => void;
@@ -83,7 +126,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(KEY);
-      if (raw) setState({ ...initialState, ...(JSON.parse(raw) as State) });
+      if (raw) setState(normalizeStoredState(JSON.parse(raw) as Partial<State>));
       const rawSession = localStorage.getItem(SESSION_KEY);
       if (rawSession) setSession(JSON.parse(rawSession));
     } catch {
@@ -106,17 +149,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const pushActivity = useCallback((item: Omit<ActivityItem, "id" | "at">) => {
     setState((s) => ({
       ...s,
-      activities: [{ ...item, id: uid(), at: new Date().toISOString() }, ...s.activities].slice(0, 60),
-    }));
-  }, []);
-
-  const pushNotification = useCallback((n: Omit<AppNotification, "id" | "at" | "read" | "resolved">) => {
-    setState((s) => ({
-      ...s,
-      notifications: [
-        { ...n, id: uid(), at: new Date().toISOString(), read: false, resolved: false },
-        ...s.notifications,
-      ],
+      activities: [{ ...item, id: uid(), at: new Date().toISOString() }, ...s.activities].slice(
+        0,
+        60,
+      ),
     }));
   }, []);
 
@@ -130,7 +166,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       hydrated,
       session,
       login: (email) => {
-        const member = state.staff.find((s) => s.email.toLowerCase() === email.trim().toLowerCase());
+        const member = state.staff.find(
+          (s) => s.email.toLowerCase() === email.trim().toLowerCase(),
+        );
         if (!member || member.locked) return false;
         setSession({ user: { name: member.name, email: member.email, role: member.role } });
         return true;
@@ -142,7 +180,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           games: [{ ...game, id: uid(), history: [], incidents: [], usage30d: 0 }, ...s.games],
         })),
       updateGame: (id, patch) =>
-        setState((s) => ({ ...s, games: s.games.map((g) => (g.id === id ? { ...g, ...patch } : g)) })),
+        setState((s) => ({
+          ...s,
+          games: s.games.map((g) => (g.id === id ? { ...g, ...patch } : g)),
+        })),
       setGameStatus: (id, status, note) => {
         setState((s) => ({
           ...s,
@@ -172,46 +213,210 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           staff: session?.user.name ?? "Hệ thống",
         });
       },
-      saveComponents: (id, components) => {
-        const missing = components.some((c) => !c.ok);
-        setState((s) => ({
-          ...s,
-          games: s.games.map((g) =>
-            g.id === id
-              ? {
-                  ...g,
-                  components,
-                  status: missing ? "missing_parts" : g.status === "missing_parts" ? "available" : g.status,
-                  incidents: missing
-                    ? [
-                        {
-                          id: uid(),
-                          level: "medium" as const,
-                          title: `Thiếu linh kiện: ${components.filter((c) => !c.ok).map((c) => c.name).join(", ")}`,
-                          at: new Date().toISOString(),
-                          staff: session?.user.name ?? "Nhân viên",
-                          resolved: false,
-                        },
-                        ...g.incidents,
-                      ]
-                    : g.incidents,
-                }
-              : g,
-          ),
-        }));
-        pushActivity({
-          kind: missing ? "missing" : "checklist",
-          text: missing ? `Báo thiếu linh kiện của ${gameName(id)}` : `Hoàn tất checklist ${gameName(id)}`,
-          staff: session?.user.name ?? "Nhân viên",
-        });
-        if (missing)
-          pushNotification({
-            type: "Linh kiện",
-            level: "critical",
-            title: `${gameName(id)} thiếu linh kiện`,
-            body: "Checklist ghi nhận linh kiện chưa đầy đủ, cần xử lý trước khi đưa lại vào kho.",
-            to: `/app/games/${id}`,
+      saveComponentInspection: (input) => {
+        const validationError = validateComponentInspection(input.components);
+        if (validationError) throw new Error(validationError);
+
+        const at = new Date().toISOString();
+        const actor = session?.user.name ?? "Nhân viên";
+        setState((s) => {
+          const game = s.games.find((candidate) => candidate.id === input.gameId);
+          if (!game) return s;
+
+          const table = s.tables.find((candidate) => candidate.gameId === input.gameId);
+          const result = componentInspectionResult(input.components);
+          const hasIssue = result !== "ok";
+          const details = input.components
+            .filter((component) => component.condition !== "ok")
+            .map((component) =>
+              component.condition === "missing"
+                ? `${component.name}: thiếu ${component.missingQty}/${component.qty}${component.note?.trim() ? ` (${component.note.trim()})` : ""}`
+                : `${component.name}: hư hỏng (${component.note?.trim()})`,
+            )
+            .concat(input.note?.trim() ? [`Ghi chú chung: ${input.note.trim()}`] : [])
+            .join(". ");
+          const title =
+            result === "damaged"
+              ? input.components.some((component) => component.condition === "missing")
+                ? "Thiếu và hư hỏng linh kiện"
+                : "Phát hiện linh kiện hư hỏng"
+              : result === "missing"
+                ? `Thiếu linh kiện: ${input.components
+                    .filter((component) => component.condition === "missing")
+                    .map(
+                      (component) => `${component.name} (${component.missingQty}/${component.qty})`,
+                    )
+                    .join(", ")}`
+                : "Checklist linh kiện đầy đủ";
+
+          const legacyIncidentPattern = /thiếu|linh kiện|hư hỏng|rách|cong/i;
+          const componentIncidents = game.incidents.filter(
+            (incident) =>
+              !incident.resolved &&
+              (incident.kind === "components" || legacyIncidentPattern.test(incident.title)),
+          );
+          const activeIncident = componentIncidents[0];
+          let incidents = game.incidents.map((incident) => {
+            if (!componentIncidents.some((candidate) => candidate.id === incident.id))
+              return incident;
+            if (hasIssue && incident.id === activeIncident?.id) {
+              return {
+                ...incident,
+                kind: "components" as const,
+                title,
+                details,
+                level: input.level,
+                at,
+                staff: actor,
+                resolved: false,
+              };
+            }
+            return { ...incident, resolved: true };
           });
+          if (hasIssue && !activeIncident) {
+            incidents = [
+              {
+                id: uid(),
+                kind: "components",
+                level: input.level,
+                title,
+                details,
+                at,
+                staff: actor,
+                resolved: false,
+              },
+              ...incidents,
+            ];
+          }
+
+          const notificationMatches = (notification: AppNotification) =>
+            !notification.resolved &&
+            ((notification.source === "component_inspection" && notification.gameId === game.id) ||
+              (notification.type === "Linh kiện" && notification.to === `/app/games/${game.id}`));
+          const activeNotification = s.notifications.find(notificationMatches);
+          let notifications = s.notifications.map((notification) => {
+            if (!notificationMatches(notification)) return notification;
+            if (hasIssue && notification.id === activeNotification?.id) {
+              return {
+                ...notification,
+                source: "component_inspection" as const,
+                gameId: game.id,
+                level: input.level === "high" ? ("critical" as const) : ("warning" as const),
+                title: `${game.name}: ${title}`,
+                body: details,
+                at,
+                read: false,
+                resolved: false,
+              };
+            }
+            return { ...notification, resolved: true };
+          });
+          if (hasIssue && !activeNotification) {
+            notifications = [
+              {
+                id: uid(),
+                type: "Linh kiện",
+                level: input.level === "high" ? "critical" : "warning",
+                title: `${game.name}: ${title}`,
+                body: details,
+                at,
+                read: false,
+                resolved: false,
+                to: `/app/games/${game.id}`,
+                source: "component_inspection",
+                gameId: game.id,
+              },
+              ...notifications,
+            ];
+          }
+
+          const nextStatus: GameStatus =
+            input.forceMaintenance || result === "damaged"
+              ? "maintenance"
+              : result === "missing"
+                ? "missing_parts"
+                : input.context === "return"
+                  ? input.components.length > 0
+                    ? "available"
+                    : "pending_check"
+                  : game.status === "pending_check" || game.status === "missing_parts"
+                    ? "available"
+                    : game.status;
+          const historyLabel =
+            input.context === "return"
+              ? input.components.length === 0
+                ? "Nhận lại game, chưa có checklist linh kiện"
+                : `Nhận lại game: ${title.toLowerCase()}`
+              : `Kiểm tra linh kiện: ${title.toLowerCase()}`;
+          const activityKind: ActivityItem["kind"] =
+            input.context === "return"
+              ? "return"
+              : result === "damaged"
+                ? "maintenance"
+                : result === "missing"
+                  ? "missing"
+                  : "checklist";
+
+          return {
+            ...s,
+            games: s.games.map((candidate) =>
+              candidate.id === game.id
+                ? {
+                    ...candidate,
+                    components: input.components,
+                    status: nextStatus,
+                    location: nextStatus === "maintenance" ? "Kho bảo trì" : candidate.location,
+                    incidents,
+                    history: [
+                      {
+                        id: uid(),
+                        type: input.context === "return" ? ("return" as const) : ("check" as const),
+                        label: historyLabel,
+                        staff: actor,
+                        at,
+                      },
+                      ...candidate.history,
+                    ],
+                  }
+                : candidate,
+            ),
+            tables:
+              input.context === "return"
+                ? s.tables.map((candidate) =>
+                    candidate.gameId === game.id ? { ...candidate, gameId: undefined } : candidate,
+                  )
+                : s.tables,
+            transactions:
+              input.context === "return" && table
+                ? [
+                    {
+                      id: uid(),
+                      type: "return",
+                      gameId: game.id,
+                      tableId: table.id,
+                      staffId: table.staffId ?? "s3",
+                      at,
+                      note: historyLabel,
+                    },
+                    ...s.transactions,
+                  ]
+                : s.transactions,
+            activities: [
+              {
+                id: uid(),
+                kind: activityKind,
+                text:
+                  input.context === "return"
+                    ? `Nhận lại ${game.name}${table ? ` từ ${table.name}` : ""}: ${title.toLowerCase()}`
+                    : `${game.name}: ${title.toLowerCase()}`,
+                at,
+                staff: actor,
+              },
+              ...s.activities,
+            ].slice(0, 60),
+            notifications,
+          };
+        });
       },
       deliverGame: (gameId, tableId, staffId, guests) => {
         const at = new Date().toISOString();
@@ -224,7 +429,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
                   status: "in_use",
                   usage30d: g.usage30d + 1,
                   history: [
-                    { id: uid(), type: "deliver", label: `Giao cho ${tableName(tableId)}`, staff: staffName(staffId), at },
+                    {
+                      id: uid(),
+                      type: "deliver",
+                      label: `Giao cho ${tableName(tableId)}`,
+                      staff: staffName(staffId),
+                      at,
+                    },
                     ...g.history,
                   ],
                 }
@@ -232,10 +443,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           ),
           tables: s.tables.map((t) =>
             t.id === tableId
-              ? { ...t, status: "playing", gameId, startedAt: t.startedAt ?? at, staffId, guests: guests ?? (t.guests || 2) }
+              ? {
+                  ...t,
+                  status: "playing",
+                  gameId,
+                  startedAt: t.startedAt ?? at,
+                  staffId,
+                  guests: guests ?? (t.guests || 2),
+                }
               : t,
           ),
-          transactions: [{ id: uid(), type: "deliver", gameId, tableId, staffId, at }, ...s.transactions],
+          transactions: [
+            { id: uid(), type: "deliver", gameId, tableId, staffId, at },
+            ...s.transactions,
+          ],
         }));
         pushActivity({
           kind: "deliver",
@@ -254,7 +475,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
                   ...g,
                   status,
                   history: [
-                    { id: uid(), type: "return", label: note ?? "Nhận lại game", staff: session?.user.name ?? "Nhân viên", at },
+                    {
+                      id: uid(),
+                      type: "return",
+                      label: note ?? "Nhận lại game",
+                      staff: session?.user.name ?? "Nhân viên",
+                      at,
+                    },
                     ...g.history,
                   ],
                 }
@@ -263,7 +490,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           tables: s.tables.map((t) => (t.gameId === gameId ? { ...t, gameId: undefined } : t)),
           transactions: table
             ? [
-                { id: uid(), type: "return", gameId, tableId: table.id, staffId: table.staffId ?? "s3", at, note },
+                {
+                  id: uid(),
+                  type: "return",
+                  gameId,
+                  tableId: table.id,
+                  staffId: table.staffId ?? "s3",
+                  at,
+                  note,
+                },
                 ...s.transactions,
               ]
             : s.transactions,
@@ -275,7 +510,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         });
       },
       updateTable: (id, patch) =>
-        setState((s) => ({ ...s, tables: s.tables.map((t) => (t.id === id ? { ...t, ...patch } : t)) })),
+        setState((s) => ({
+          ...s,
+          tables: s.tables.map((t) => (t.id === id ? { ...t, ...patch } : t)),
+        })),
       setTableStatus: (id, status) => {
         const at = new Date().toISOString();
         const tracksSession = status === "playing" || status === "support" || status === "issue";
@@ -293,34 +531,58 @@ export function StoreProvider({ children }: { children: ReactNode }) {
               : t,
           ),
         }));
-        pushActivity({ kind: "table", text: `${tableName(id)} chuyển sang trạng thái mới`, staff: session?.user.name ?? "Nhân viên" });
+        pushActivity({
+          kind: "table",
+          text: `${tableName(id)} chuyển sang trạng thái mới`,
+          staff: session?.user.name ?? "Nhân viên",
+        });
       },
       endSession: (tableId) => {
         const table = state.tables.find((t) => t.id === tableId);
         setState((s) => ({
           ...s,
           tables: s.tables.map((t) =>
-            t.id === tableId ? { ...t, status: "cleaning", guests: 0, gameId: undefined, startedAt: undefined } : t,
+            t.id === tableId
+              ? { ...t, status: "cleaning", guests: 0, gameId: undefined, startedAt: undefined }
+              : t,
           ),
-          games: s.games.map((g) => (g.id === table?.gameId ? { ...g, status: "pending_check" } : g)),
+          games: s.games.map((g) =>
+            g.id === table?.gameId ? { ...g, status: "pending_check" } : g,
+          ),
         }));
-        pushActivity({ kind: "table", text: `Kết thúc phiên chơi tại ${tableName(tableId)}`, staff: session?.user.name ?? "Nhân viên" });
+        pushActivity({
+          kind: "table",
+          text: `Kết thúc phiên chơi tại ${tableName(tableId)}`,
+          staff: session?.user.name ?? "Nhân viên",
+        });
       },
       addStaff: (member) =>
         setState((s) => ({
           ...s,
-          staff: [...s.staff, { ...member, id: uid(), actionsToday: 0, lastActive: new Date().toISOString() }],
+          staff: [
+            ...s.staff,
+            { ...member, id: uid(), actionsToday: 0, lastActive: new Date().toISOString() },
+          ],
         })),
       updateStaff: (id, patch) =>
-        setState((s) => ({ ...s, staff: s.staff.map((m) => (m.id === id ? { ...m, ...patch } : m)) })),
+        setState((s) => ({
+          ...s,
+          staff: s.staff.map((m) => (m.id === id ? { ...m, ...patch } : m)),
+        })),
       markNotification: (id, patch) =>
-        setState((s) => ({ ...s, notifications: s.notifications.map((n) => (n.id === id ? { ...n, ...patch } : n)) })),
+        setState((s) => ({
+          ...s,
+          notifications: s.notifications.map((n) => (n.id === id ? { ...n, ...patch } : n)),
+        })),
       markAllRead: () =>
-        setState((s) => ({ ...s, notifications: s.notifications.map((n) => ({ ...n, read: true })) })),
+        setState((s) => ({
+          ...s,
+          notifications: s.notifications.map((n) => ({ ...n, read: true })),
+        })),
       updateSettings: (patch) => setState((s) => ({ ...s, settings: { ...s.settings, ...patch } })),
       resetData: () => setState(initialState),
     };
-  }, [state, session, hydrated, pushActivity, pushNotification]);
+  }, [state, session, hydrated, pushActivity]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }

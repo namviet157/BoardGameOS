@@ -7,9 +7,29 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useStore } from "@/lib/bgos/store";
 import { timeAgo } from "@/lib/bgos/helpers";
 import type { StaffRole } from "@/lib/bgos/types";
@@ -19,7 +39,10 @@ export const Route = createFileRoute("/app/staff")({
   head: () => ({
     meta: [
       { title: "Nhân viên — BoardGameOS" },
-      { name: "description", content: "Quản lý tài khoản nhân viên, vai trò, ca làm việc và quyền thao tác trong quán." },
+      {
+        name: "description",
+        content: "Quản lý tài khoản nhân viên, vai trò, ca làm việc và quyền thao tác trong quán.",
+      },
       { property: "og:title", content: "Nhân viên — BoardGameOS" },
       { property: "og:description", content: "Quản lý đội ngũ và phân quyền vận hành." },
     ],
@@ -29,7 +52,18 @@ export const Route = createFileRoute("/app/staff")({
 
 type EditableStaffRole = Exclude<StaffRole, "Chủ quán">;
 
-const EDITABLE_ROLES: EditableStaffRole[] = ["Quản lý", "Thu ngân", "Nhân viên phục vụ", "Nhân viên kho"];
+const EDITABLE_ROLES: EditableStaffRole[] = [
+  "Quản lý",
+  "Thu ngân",
+  "Nhân viên phục vụ",
+  "Nhân viên kho",
+];
+
+const STAFF_SHIFTS = [
+  "Ca sáng (08:00 - 16:00)",
+  "Ca chiều (14:00 - 22:00)",
+  "Ca tối (17:00 - 23:00)",
+];
 
 const ROLE_PERMISSIONS: Record<EditableStaffRole, string[]> = {
   "Quản lý": ["Kho game", "Bàn chơi", "Giao nhận game", "Kiểm tra linh kiện", "Tư vấn game"],
@@ -43,7 +77,12 @@ function StaffPage() {
   const { staff, session, addStaff, updateStaff } = useStore();
   const [open, setOpen] = useState(false);
   const [lockingStaffId, setLockingStaffId] = useState<string | null>(null);
-  const [form, setForm] = useState({ name: "", email: "", role: "Nhân viên phục vụ" as EditableStaffRole, shift: "Ca sáng (08:00 - 16:00)" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    role: "Nhân viên phục vụ" as EditableStaffRole,
+    shift: "Ca sáng (08:00 - 16:00)",
+  });
   const lockingStaff = staff.find((member) => member.id === lockingStaffId);
 
   return (
@@ -53,27 +92,73 @@ function StaffPage() {
         description="Danh sách tài khoản và quyền hạn của đội ngũ."
         actions={
           <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild><Button className="rounded-xl">Thêm nhân viên</Button></DialogTrigger>
+            <DialogTrigger asChild>
+              <Button className="rounded-xl">Thêm nhân viên</Button>
+            </DialogTrigger>
             <DialogContent className="rounded-2xl">
-              <DialogHeader><DialogTitle>Thêm nhân viên mới</DialogTitle></DialogHeader>
+              <DialogHeader>
+                <DialogTitle>Thêm nhân viên mới</DialogTitle>
+              </DialogHeader>
               <div className="space-y-3">
-                <Input placeholder="Họ và tên" className="rounded-xl" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-                <Input placeholder="Email" className="rounded-xl" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-                <Select value={form.role} onValueChange={(v) => setForm({ ...form, role: v as EditableStaffRole })}>
-                  <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
-                  <SelectContent>{EDITABLE_ROLES.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
+                <Input
+                  placeholder="Họ và tên"
+                  className="rounded-xl"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                />
+                <Input
+                  placeholder="Email"
+                  className="rounded-xl"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                />
+                <Select
+                  value={form.role}
+                  onValueChange={(v) => setForm({ ...form, role: v as EditableStaffRole })}
+                >
+                  <SelectTrigger className="rounded-xl">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {EDITABLE_ROLES.map((r) => (
+                      <SelectItem key={r} value={r}>
+                        {r}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
-                <Input placeholder="Ca làm việc" className="rounded-xl" value={form.shift} onChange={(e) => setForm({ ...form, shift: e.target.value })} />
+                <Select value={form.shift} onValueChange={(shift) => setForm({ ...form, shift })}>
+                  <SelectTrigger className="rounded-xl">
+                    <SelectValue placeholder="Chọn ca làm việc" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STAFF_SHIFTS.map((shift) => (
+                      <SelectItem key={shift} value={shift}>
+                        {shift}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <DialogFooter>
                 <Button
                   className="rounded-xl"
                   disabled={!form.name || !form.email}
                   onClick={() => {
-                    addStaff({ ...form, active: true, locked: false, permissions: ROLE_PERMISSIONS[form.role] });
+                    addStaff({
+                      ...form,
+                      active: true,
+                      locked: false,
+                      permissions: ROLE_PERMISSIONS[form.role],
+                    });
                     toast.success("Đã thêm nhân viên");
                     setOpen(false);
-                    setForm({ name: "", email: "", role: "Nhân viên phục vụ", shift: "Ca sáng (08:00 - 16:00)" });
+                    setForm({
+                      name: "",
+                      email: "",
+                      role: "Nhân viên phục vụ",
+                      shift: "Ca sáng (08:00 - 16:00)",
+                    });
                   }}
                 >
                   Lưu nhân viên
@@ -103,7 +188,11 @@ function StaffPage() {
                   <p className="font-medium">{s.name}</p>
                   <p className="text-xs text-muted-foreground">{s.email}</p>
                   <div className="mt-1 flex flex-wrap gap-1">
-                    {s.permissions.map((p) => <Badge key={p} variant="secondary" className="rounded-lg text-[11px]">{p}</Badge>)}
+                    {s.permissions.map((p) => (
+                      <Badge key={p} variant="secondary" className="rounded-lg text-[11px]">
+                        {p}
+                      </Badge>
+                    ))}
                   </div>
                 </TableCell>
                 <TableCell>
@@ -118,16 +207,24 @@ function StaffPage() {
                         toast.success(`Đã cập nhật vai trò của ${s.name}`);
                       }}
                     >
-                      <SelectTrigger className="w-44 rounded-xl"><SelectValue /></SelectTrigger>
+                      <SelectTrigger className="w-44 rounded-xl">
+                        <SelectValue />
+                      </SelectTrigger>
                       <SelectContent>
-                        {EDITABLE_ROLES.map((role) => <SelectItem key={role} value={role}>{role}</SelectItem>)}
+                        {EDITABLE_ROLES.map((role) => (
+                          <SelectItem key={role} value={role}>
+                            {role}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   )}
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">{s.shift}</TableCell>
                 <TableCell>{s.actionsToday}</TableCell>
-                <TableCell className="text-sm text-muted-foreground">{timeAgo(s.lastActive)}</TableCell>
+                <TableCell className="text-sm text-muted-foreground">
+                  {timeAgo(s.lastActive)}
+                </TableCell>
                 <TableCell className="text-right">
                   <Switch
                     checked={s.locked}

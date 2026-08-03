@@ -2,11 +2,13 @@ export type GameStatus = "available" | "in_use" | "pending_check" | "missing_par
 
 export type Difficulty = "Dễ" | "Trung bình" | "Khó";
 
+export type ComponentCondition = "ok" | "missing" | "damaged";
+
 export interface GameComponentItem {
   id: string;
   name: string;
   qty: number;
-  ok: boolean;
+  condition: ComponentCondition;
   missingQty: number;
   note?: string;
 }
@@ -26,6 +28,8 @@ export interface GameIncident {
   at: string;
   staff: string;
   resolved: boolean;
+  kind?: "components";
+  details?: string;
 }
 
 export interface Game {
@@ -110,6 +114,17 @@ export interface AppNotification {
   read: boolean;
   resolved: boolean;
   to?: string;
+  source?: "component_inspection";
+  gameId?: string;
+}
+
+export interface ComponentInspectionInput {
+  gameId: string;
+  components: GameComponentItem[];
+  level: GameIncident["level"];
+  note?: string;
+  context: "standalone" | "return";
+  forceMaintenance?: boolean;
 }
 
 export interface ReportDay {

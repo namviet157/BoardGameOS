@@ -7,7 +7,7 @@ export function createGameComponentDraft(): GameComponentDraft {
     id: crypto.randomUUID(),
     name: "",
     qty: "1",
-    ok: true,
+    condition: "ok",
     missingQty: 0,
   };
 }
@@ -22,6 +22,9 @@ export function validateGameComponentDrafts(items: GameComponentDraft[]) {
     const quantity = Number(item.qty);
     if (!Number.isInteger(quantity) || quantity < 1) {
       return `Số lượng của ${item.name.trim()} phải là số nguyên từ 1 trở lên.`;
+    }
+    if (item.condition === "missing" && item.missingQty > quantity) {
+      return `Số lượng chuẩn của ${item.name.trim()} không thể nhỏ hơn số lượng đang thiếu.`;
     }
   }
   return null;
