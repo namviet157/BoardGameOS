@@ -18,13 +18,13 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { useStore } from "@/lib/bgos/store";
 import { AiChatWidget } from "./AiChatWidget";
+import { GlobalSearchDialog } from "./GlobalSearchDialog";
 import { QrScanDialog } from "./QrScanDialog";
 
 type NavItem = {
@@ -112,6 +112,7 @@ export function AppLayout() {
   const navigate = useNavigate();
   const { hydrated, session, logout, settings, notifications } = useStore();
   const [scanOpen, setScanOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const unread = notifications.filter((n) => !n.read).length;
@@ -136,6 +137,18 @@ export function AppLayout() {
     });
     void navigate({ to: "/app", replace: true });
   }, [accessDenied, navigate]);
+
+  useEffect(() => {
+    function handleSearchShortcut(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setSearchOpen(true);
+      }
+    }
+
+    window.addEventListener("keydown", handleSearchShortcut);
+    return () => window.removeEventListener("keydown", handleSearchShortcut);
+  }, []);
 
   const initials = (session?.user.name ?? "BG")
     .split(" ")
@@ -188,18 +201,30 @@ export function AppLayout() {
               <span className="truncate text-xs text-muted-foreground">{settings.branch}</span>
             </div>
 
-            <div className="relative ml-auto hidden w-full max-w-xs md:block">
+            <button
+              type="button"
+              className="relative ml-auto hidden h-9 w-full max-w-xs items-center rounded-xl border border-input bg-background pl-9 pr-3 text-left text-sm text-muted-foreground shadow-sm transition-colors hover:bg-accent md:flex"
+              onClick={() => setSearchOpen(true)}
+            >
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Tìm game, bàn, nhân viên..."
-                className="rounded-xl pl-9"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") navigate({ to: "/app/games" });
-                }}
-              />
-            </div>
+              <span className="truncate">Tìm game, bàn, nhân viên...</span>
+            </button>
 
             <div className="ml-auto flex items-center gap-1.5 md:ml-0">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-xl md:hidden"
+                    onClick={() => setSearchOpen(true)}
+                    aria-label="Tìm kiếm"
+                  >
+                    <Search className="h-4.5 w-4.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Tìm kiếm</TooltipContent>
+              </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -279,6 +304,7 @@ export function AppLayout() {
       </nav>
 
       <AiChatWidget />
+      <GlobalSearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
       <QrScanDialog
         open={scanOpen}
         onOpenChange={setScanOpen}

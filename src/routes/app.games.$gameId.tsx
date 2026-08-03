@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { PageHeader, EmptyState } from "@/components/bgos/StatCard";
 import { GameThumb } from "@/components/bgos/GameThumb";
 import { GameStatusBadge } from "@/components/bgos/StatusBadge";
+import { ConfirmActionDialog } from "@/components/bgos/ConfirmActionDialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -35,6 +36,7 @@ function GameDetail() {
   const game = games.find((g) => g.id === gameId);
   const [tableId, setTableId] = useState("");
   const [note, setNote] = useState(game?.notes ?? "");
+  const [maintenanceOpen, setMaintenanceOpen] = useState(false);
 
   if (!game) {
     return (
@@ -66,13 +68,20 @@ function GameDetail() {
         description={`${game.code} · ${game.category} · ${game.location}`}
         actions={
           <>
-            <Select value={game.status} onValueChange={(v) => { setGameStatus(game.id, v as GameStatus, `Cập nhật thành ${GAME_STATUS_LABEL[v as GameStatus]}`); toast.success("Đã cập nhật trạng thái"); }}>
+            <Select value={game.status} onValueChange={(v) => {
+              if (v === "maintenance") {
+                setMaintenanceOpen(true);
+                return;
+              }
+              setGameStatus(game.id, v as GameStatus, `Cập nhật thành ${GAME_STATUS_LABEL[v as GameStatus]}`);
+              toast.success("Đã cập nhật trạng thái");
+            }}>
               <SelectTrigger className="w-48 rounded-xl"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {Object.entries(GAME_STATUS_LABEL).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Button variant="outline" className="rounded-xl" onClick={() => { setGameStatus(game.id, "maintenance", "Chuyển sang bảo trì"); toast.success("Đã chuyển sang bảo trì"); }}>
+            <Button variant="outline" className="rounded-xl" onClick={() => setMaintenanceOpen(true)}>
               <Wrench className="h-4 w-4" /> Bảo trì
             </Button>
           </>
@@ -205,6 +214,18 @@ function GameDetail() {
           </Tabs>
         </div>
       </div>
+
+      <ConfirmActionDialog
+        open={maintenanceOpen}
+        onOpenChange={setMaintenanceOpen}
+        title={`Chuyển ${game.name} sang bảo trì?`}
+        description="Game sẽ không còn được xem là sẵn sàng để giao cho khách cho đến khi trạng thái được cập nhật lại."
+        confirmLabel="Chuyển sang bảo trì"
+        onConfirm={() => {
+          setGameStatus(game.id, "maintenance", "Chuyển sang bảo trì");
+          toast.success("Đã chuyển sang bảo trì");
+        }}
+      />
     </div>
   );
 }

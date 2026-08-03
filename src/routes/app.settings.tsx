@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { ConfirmActionDialog } from "@/components/bgos/ConfirmActionDialog";
 import { PageHeader } from "@/components/bgos/StatCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +24,7 @@ export const Route = createFileRoute("/app/settings")({
 
 function SettingsPage() {
   const { settings, updateSettings, resetData } = useStore();
+  const [resetOpen, setResetOpen] = useState(false);
 
   return (
     <div className="space-y-6">
@@ -66,11 +69,24 @@ function SettingsPage() {
           <p className="text-sm text-muted-foreground">
             Dữ liệu demo được lưu trên trình duyệt của bạn. Bạn có thể khôi phục về dữ liệu mẫu ban đầu bất cứ lúc nào.
           </p>
-          <Button variant="destructive" className="rounded-xl" onClick={() => { resetData(); toast.success("Đã khôi phục dữ liệu mẫu"); }}>
+          <Button variant="destructive" className="rounded-xl" onClick={() => setResetOpen(true)}>
             Khôi phục dữ liệu mẫu
           </Button>
         </TabsContent>
       </Tabs>
+
+      <ConfirmActionDialog
+        open={resetOpen}
+        onOpenChange={setResetOpen}
+        title="Khôi phục dữ liệu mẫu?"
+        description="Toàn bộ thay đổi trong dữ liệu demo hiện tại sẽ bị xóa và không thể hoàn tác. Phiên đăng nhập của bạn vẫn được giữ nguyên."
+        confirmLabel="Khôi phục"
+        destructive
+        onConfirm={() => {
+          resetData();
+          toast.success("Đã khôi phục dữ liệu mẫu");
+        }}
+      />
     </div>
   );
 }

@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { ConfirmActionDialog } from "@/components/bgos/ConfirmActionDialog";
 import { PageHeader } from "@/components/bgos/StatCard";
 import { TableStatusBadge } from "@/components/bgos/StatusBadge";
 import { Button } from "@/components/ui/button";
@@ -32,6 +34,8 @@ const STATUS_OPTIONS: { value: TableStatus; label: string }[] = [
 function TablesPage() {
   useMinuteRefresh();
   const { tables, games, staff, setTableStatus, updateTable, endSession, deliverGame } = useStore();
+  const [endingTableId, setEndingTableId] = useState<string | null>(null);
+  const endingTable = tables.find((table) => table.id === endingTableId);
 
   return (
     <div className="space-y-6">
@@ -83,7 +87,7 @@ function TablesPage() {
                       Tạo phiên chơi
                     </Button>
                   ) : (
-                    <Button size="sm" variant="outline" className="rounded-lg" onClick={() => { endSession(t.id); toast.success("Đã kết thúc phiên chơi"); }}>
+                    <Button size="sm" variant="outline" className="rounded-lg" onClick={() => setEndingTableId(t.id)}>
                       Kết thúc phiên
                     </Button>
                   )}
@@ -96,6 +100,20 @@ function TablesPage() {
           );
         })}
       </div>
+
+      <ConfirmActionDialog
+        open={!!endingTableId}
+        onOpenChange={(nextOpen) => !nextOpen && setEndingTableId(null)}
+        title={`Kết thúc phiên chơi tại ${endingTable?.name ?? "bàn"}?`}
+        description="Game đang chơi sẽ chuyển sang chờ kiểm tra và bàn sẽ chuyển sang trạng thái đang dọn."
+        confirmLabel="Kết thúc phiên"
+        onConfirm={() => {
+          if (!endingTable) return;
+          endSession(endingTable.id);
+          toast.success(`Đã kết thúc phiên chơi tại ${endingTable.name}`);
+          setEndingTableId(null);
+        }}
+      />
     </div>
   );
 }

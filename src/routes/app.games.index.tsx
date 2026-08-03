@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { PageHeader, EmptyState } from "@/components/bgos/StatCard";
 import { GameThumb } from "@/components/bgos/GameThumb";
 import { GameStatusBadge } from "@/components/bgos/StatusBadge";
+import { ConfirmActionDialog } from "@/components/bgos/ConfirmActionDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,6 +39,7 @@ function GamesPage() {
   const [players, setPlayers] = useState("all");
   const [addOpen, setAddOpen] = useState(false);
   const [qrGame, setQrGame] = useState<string | null>(null);
+  const [maintenanceGameId, setMaintenanceGameId] = useState<string | null>(null);
 
   const filtered = useMemo(
     () =>
@@ -55,6 +57,7 @@ function GamesPage() {
   );
 
   const qrTarget = games.find((g) => g.id === qrGame);
+  const maintenanceGame = games.find((g) => g.id === maintenanceGameId);
 
   return (
     <div className="space-y-6">
@@ -140,7 +143,7 @@ function GamesPage() {
                           size="sm"
                           variant="ghost"
                           className="rounded-lg"
-                          onClick={() => { setGameStatus(g.id, "maintenance", "Chuyển sang bảo trì"); toast.success(`${g.name} đã chuyển sang bảo trì`); }}
+                          onClick={() => setMaintenanceGameId(g.id)}
                         >
                           <Wrench className="h-4 w-4" />
                         </Button>
@@ -190,6 +193,20 @@ function GamesPage() {
           <Button variant="outline" className="rounded-xl" onClick={() => toast.success("Đã gửi lệnh in mã QR")}>In mã QR</Button>
         </DialogContent>
       </Dialog>
+
+      <ConfirmActionDialog
+        open={!!maintenanceGameId}
+        onOpenChange={(nextOpen) => !nextOpen && setMaintenanceGameId(null)}
+        title={`Chuyển ${maintenanceGame?.name ?? "game"} sang bảo trì?`}
+        description="Game sẽ không còn được xem là sẵn sàng để giao cho khách cho đến khi trạng thái được cập nhật lại."
+        confirmLabel="Chuyển sang bảo trì"
+        onConfirm={() => {
+          if (!maintenanceGame) return;
+          setGameStatus(maintenanceGame.id, "maintenance", "Chuyển sang bảo trì");
+          toast.success(`${maintenanceGame.name} đã chuyển sang bảo trì`);
+          setMaintenanceGameId(null);
+        }}
+      />
 
       <AddGameDialog open={addOpen} onOpenChange={setAddOpen} onAdd={addGame} />
     </div>

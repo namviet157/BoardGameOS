@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { createAiDataSnapshot } from "@/lib/ai/context";
 import { askOperationsAssistant } from "@/lib/ai/operations-chat.functions";
-import type { ChatMessage } from "@/lib/ai/types";
+import type { ChatMessage, OperationsChatRequest } from "@/lib/ai/types";
 import { useStore } from "@/lib/bgos/store";
 import { cn } from "@/lib/utils";
 
@@ -26,48 +26,70 @@ export function AiChatWidget() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [suggestedQuestions, setSuggestedQuestions] = useState(INITIAL_QUESTIONS);
   const [isLoading, setIsLoading] = useState(false);
+  const [isTakingLonger, setIsTakingLonger] = useState(false);
   const [error, setError] = useState("");
+  const [failedRequest, setFailedRequest] = useState<OperationsChatRequest | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
-  async function sendMessage(value = question) {
-    const trimmed = value.trim();
-    if (!trimmed || isLoading) return;
+  useEffect(() => {
+    if (!isLoading) return;
 
-    const history = messages.slice(-6);
-    const userMessage: ChatMessage = { role: "user", content: trimmed };
-    setMessages((current) => [...current, userMessage]);
-    setQuestion("");
+    const timeoutId = window.setTimeout(() => setIsTakingLonger(true), 8_000);
+    return () => window.clearTimeout(timeoutId);
+  }, [isLoading]);
+
+  async function runRequest(request: OperationsChatRequest, appendUserMessage: boolean) {
+    if (isLoading) return;
+
+    if (appendUserMessage) {
+      setMessages((current) => [...current, { role: "user", content: request.question }]);
+      setQuestion("");
+    }
     setError("");
+    setFailedRequest(null);
     setSuggestedQuestions([]);
+    setIsTakingLonger(false);
     setIsLoading(true);
 
     try {
-      const response = await askOperationsAssistant({
-        data: {
-          question: trimmed,
-          currentPath,
-          history,
-          data: createAiDataSnapshot(store),
-        },
-      });
+      const response = await askOperationsAssistant({ data: request });
       setMessages((current) => [...current, { role: "assistant", content: response.answer }]);
       setSuggestedQuestions(response.suggestedQuestions);
     } catch (requestError) {
       console.error(requestError);
       setError("AI đang tạm thời không phản hồi. Vui lòng thử lại.");
+      setFailedRequest(request);
     } finally {
+      setIsTakingLonger(false);
       setIsLoading(false);
     }
   }
 
+  async function sendMessage(value = question) {
+    const trimmed = value.trim();
+    if (!trimmed || isLoading) return;
+
+    await runRequest(
+      {
+        question: trimmed,
+        currentPath,
+        history: messages.slice(-6),
+        data: createAiDataSnapshot(store),
+      },
+      true,
+    );
+  }
+
   function clearConversation() {
+    if (isLoading) return;
     setMessages([]);
     setQuestion("");
     setError("");
+    setFailedRequest(null);
     setSuggestedQuestions(INITIAL_QUESTIONS);
   }
 
@@ -108,6 +130,7 @@ export function AiChatWidget() {
               variant="ghost"
               size="icon"
               onClick={clearConversation}
+              disabled={isLoading}
               aria-label="Xóa hội thoại"
             >
               <Trash2 />
@@ -174,13 +197,23 @@ export function AiChatWidget() {
               <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/12 text-primary">
                 <LoaderCircle className="h-4 w-4 animate-spin" />
               </span>
-              Đang phân tích dữ liệu...
+              {isTakingLonger
+                ? "AI đang xử lý nhiều dữ liệu, vui lòng chờ..."
+                : "Đang phân tích dữ liệu..."}
             </div>
           ) : null}
 
-          {error ? (
-            <div className="rounded-xl border border-destructive/30 bg-destructive/8 px-3 py-2 text-sm text-destructive">
-              {error}
+          {error && failedRequest ? (
+            <div className="space-y-2 rounded-xl border border-destructive/30 bg-destructive/8 px-3 py-2 text-sm text-destructive">
+              <p>{error}</p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-lg"
+                onClick={() => void runRequest(failedRequest, false)}
+              >
+                Thử lại
+              </Button>
             </div>
           ) : null}
 

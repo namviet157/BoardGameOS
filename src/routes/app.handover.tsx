@@ -4,6 +4,7 @@ import { QrCode } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/bgos/StatCard";
 import { QrScanDialog } from "@/components/bgos/QrScanDialog";
+import { ConfirmActionDialog } from "@/components/bgos/ConfirmActionDialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -30,6 +31,7 @@ function HandoverPage() {
   const [staffId, setStaffId] = useState(staff[2]?.id ?? "");
   const [returnGameId, setReturnGameId] = useState("");
   const [checked, setChecked] = useState<Record<string, boolean>>({});
+  const [maintenanceOpen, setMaintenanceOpen] = useState(false);
 
   const returned = games.find((g) => g.id === returnGameId);
 
@@ -130,7 +132,7 @@ function HandoverPage() {
                 variant="outline"
                 className="rounded-xl"
                 disabled={!returned}
-                onClick={() => { if (returned) { returnGame(returned.id, "maintenance", "Chuyển sang xử lý sự cố"); toast.success("Đã chuyển game sang bảo trì"); setReturnGameId(""); } }}
+                onClick={() => setMaintenanceOpen(true)}
               >
                 Chuyển sang xử lý sự cố
               </Button>
@@ -138,6 +140,20 @@ function HandoverPage() {
           </Step>
         </TabsContent>
       </Tabs>
+
+      <ConfirmActionDialog
+        open={maintenanceOpen}
+        onOpenChange={setMaintenanceOpen}
+        title={`Chuyển ${returned?.name ?? "game"} sang xử lý sự cố?`}
+        description="Game sẽ được nhận lại và chuyển sang trạng thái bảo trì, không thể tiếp tục giao cho khách."
+        confirmLabel="Chuyển sang bảo trì"
+        onConfirm={() => {
+          if (!returned) return;
+          returnGame(returned.id, "maintenance", "Chuyển sang xử lý sự cố");
+          toast.success("Đã chuyển game sang bảo trì");
+          setReturnGameId("");
+        }}
+      />
 
       <QrScanDialog open={scanOpen} onOpenChange={setScanOpen} onScanned={(id) => { setGameId(id); setReturnGameId(id); toast.success("Đã quét mã QR game"); }} />
     </div>
