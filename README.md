@@ -35,21 +35,14 @@ Dữ liệu nghiệp vụ được lưu trên trình duyệt bằng `localStorag
 - [👥 Tài khoản demo](#tai-khoan-demo)
 - [🔐 Phân quyền giao diện](#phan-quyen-giao-dien)
 - [📖 Hướng dẫn sử dụng](#huong-dan-su-dung)
-- [💾 Dữ liệu và localStorage](#du-lieu-localstorage)
-- [🧠 Kiến trúc chatbot AI](#kien-truc-chatbot)
-- [✅ Build và kiểm tra](#build-kiem-tra)
-- [🚀 Deploy lên Vercel](#deploy-vercel)
 - [📁 Cấu trúc thư mục](#cau-truc-thu-muc)
 - [🧭 Các route chính](#cac-route-chinh)
-- [🔧 Xử lý lỗi thường gặp](#xu-ly-loi)
-- [⚠️ Giới hạn của MVP](#gioi-han-mvp)
-- [🧑‍💻 Ghi chú phát triển](#ghi-chu-phat-trien)
 
 <a id="tinh-nang-chinh"></a>
 
 ## ✨ Tính năng chính
 
-- Dashboard tổng quan game, bàn chơi, sự cố và hoạt động gần đây.
+- Dashboard tổng quan game, bàn chơi, sự cố, cảnh báo cần xử lý và hoạt động gần đây.
 - Kho game: tìm kiếm, lọc, thêm game, xem chi tiết, cập nhật trạng thái và QR mô phỏng.
 - Quản lý checklist linh kiện, lịch sử giao nhận, sự cố và ghi chú của từng game.
 - Quản lý bàn: trạng thái, số khách, game đang chơi, nhân viên phụ trách và thời gian phiên.
@@ -58,9 +51,8 @@ Dữ liệu nghiệp vụ được lưu trên trình duyệt bằng `localStorag
 - Tìm kiếm toàn hệ thống theo game, bàn và nhân viên; hỗ trợ tìm tiếng Việt không dấu.
 - Chatbot Gemini hỏi đáp về toàn bộ snapshot dữ liệu BoardGameOS và gợi ý game đang sẵn sàng.
 - Quản lý nhân viên, vai trò, quyền hiển thị và khóa/mở khóa tài khoản.
-- Trung tâm thông báo với trạng thái đã đọc và đã xử lý.
 - Báo cáo hoạt động theo 7, 14 hoặc 30 ngày bằng Recharts.
-- Cài đặt thông tin quán, tùy chọn thông báo và khôi phục dữ liệu mẫu.
+- Cài đặt thông tin quán, công tắc mô phỏng tính năng tương lai và khôi phục dữ liệu mẫu.
 - Giao diện responsive cho desktop, tablet và mobile.
 
 <a id="cong-nghe-su-dung"></a>
@@ -199,7 +191,6 @@ Chủ quán truy cập được toàn bộ chức năng:
 - Tư vấn game.
 - Nhân viên.
 - Báo cáo.
-- Thông báo.
 - Cài đặt.
 - Chatbot AI.
 
@@ -224,7 +215,7 @@ Nhân viên sử dụng các chức năng vận hành:
 1. Mở `/login`.
 2. Chọn tài khoản Chủ quán hoặc Nhân viên.
 3. Bấm **Đăng nhập**.
-4. Dashboard hiển thị tổng số game, bàn đang hoạt động, game chờ kiểm tra, sự cố và hoạt động gần đây.
+4. Dashboard hiển thị tổng số game, bàn đang hoạt động, game chờ kiểm tra, sự cố, cảnh báo cần xử lý và hoạt động gần đây.
 
 ### 2. Tìm kiếm toàn hệ thống
 
@@ -288,7 +279,7 @@ QR scanner hiện là mô phỏng: chọn một game trong dialog thay vì sử 
 1. Bấm biểu tượng chat ở góc dưới bên phải.
 2. Chọn một câu hỏi gợi ý hoặc nhập câu hỏi mới.
 3. Nhấn Enter hoặc nút gửi.
-4. Chatbot trả lời dựa trên snapshot hiện tại gồm game, bàn, nhân viên, giao dịch, hoạt động, thông báo, báo cáo và cài đặt.
+4. Chatbot trả lời dựa trên snapshot hiện tại gồm game, bàn, nhân viên, giao dịch, hoạt động, cảnh báo vận hành, báo cáo và cài đặt.
 
 Ví dụ câu hỏi:
 
@@ -308,13 +299,7 @@ Chức năng chỉ dành cho Chủ quán:
 - Khóa tài khoản sau khi xác nhận hoặc mở khóa tài khoản.
 - Không thể thay đổi role hoặc khóa tài khoản Chủ quán đang đăng nhập.
 
-### 10. Xem thông báo và báo cáo
-
-Trong **Thông báo**, Chủ quán có thể:
-
-- Lọc thông báo theo nhóm.
-- Đánh dấu đã đọc.
-- Đánh dấu đã xử lý.
+### 10. Xem báo cáo
 
 Trong **Báo cáo**, Chủ quán có thể:
 
@@ -328,12 +313,12 @@ Trong **Báo cáo**, Chủ quán có thể:
 Trong **Cài đặt**, Chủ quán có thể:
 
 - Chỉnh thông tin quán và bấm **Lưu thay đổi**.
-- Bật/tắt các tùy chọn thông báo trong giao diện demo.
+- Xem các công tắc thông báo mô phỏng định hướng phát triển trong tương lai.
 - Chọn **Dữ liệu > Khôi phục dữ liệu mẫu** để đưa dữ liệu nghiệp vụ về trạng thái ban đầu.
 
 Khôi phục dữ liệu cần xác nhận và không làm mất session đăng nhập hiện tại.
 
-<a id="build-kiem-tra"></a>
+<a id="cau-truc-thu-muc"></a>
 
 ## 📁 Cấu trúc thư mục
 
@@ -381,5 +366,4 @@ Không chỉnh sửa thủ công `src/routeTree.gen.ts` vì file này được T
 | `/app/advisor` | Tư vấn game bằng bộ lọc | Tất cả tài khoản |
 | `/app/staff` | Quản lý nhân viên | Chủ quán |
 | `/app/reports` | Báo cáo | Chủ quán |
-| `/app/notifications` | Trung tâm thông báo | Chủ quán |
 | `/app/settings` | Cài đặt | Chủ quán |

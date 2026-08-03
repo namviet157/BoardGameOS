@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
-  Bell,
   Boxes,
   ClipboardCheck,
   Grid2x2,
@@ -30,7 +29,7 @@ import { QrScanDialog } from "./QrScanDialog";
 type NavItem = {
   to: string;
   label: string;
-  icon: typeof Bell;
+  icon: typeof Boxes;
   exact?: boolean;
   ownerOnly?: boolean;
 };
@@ -44,17 +43,10 @@ export const NAV_ITEMS: NavItem[] = [
   { to: "/app/advisor", label: "Tư vấn game", icon: Sparkles },
   { to: "/app/staff", label: "Nhân viên", icon: Users, ownerOnly: true },
   { to: "/app/reports", label: "Báo cáo", icon: TrendingUp, ownerOnly: true },
-  { to: "/app/notifications", label: "Thông báo", icon: Bell, ownerOnly: true },
   { to: "/app/settings", label: "Cài đặt", icon: Settings, ownerOnly: true },
 ];
 
-const MOBILE_ITEM_PATHS = [
-  "/app",
-  "/app/games",
-  "/app/handover",
-  "/app/tables",
-  "/app/notifications",
-];
+const MOBILE_ITEM_PATHS = ["/app", "/app/games", "/app/handover", "/app/tables"];
 
 const OWNER_ONLY_PATHS = NAV_ITEMS.filter((item) => item.ownerOnly).map((item) => item.to);
 
@@ -75,8 +67,6 @@ function Brand() {
 
 function NavList({ items, onNavigate }: { items: NavItem[]; onNavigate?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { notifications } = useStore();
-  const unread = notifications.filter((n) => !n.read).length;
 
   return (
     <nav className="space-y-1">
@@ -96,11 +86,6 @@ function NavList({ items, onNavigate }: { items: NavItem[]; onNavigate?: () => v
           >
             <item.icon className="h-4.5 w-4.5" />
             <span className="flex-1">{item.label}</span>
-            {item.to === "/app/notifications" && unread > 0 ? (
-              <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground">
-                {unread}
-              </span>
-            ) : null}
           </Link>
         );
       })}
@@ -110,12 +95,11 @@ function NavList({ items, onNavigate }: { items: NavItem[]; onNavigate?: () => v
 
 export function AppLayout() {
   const navigate = useNavigate();
-  const { hydrated, session, logout, settings, notifications } = useStore();
+  const { hydrated, session, logout, settings } = useStore();
   const [scanOpen, setScanOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const unread = notifications.filter((n) => !n.read).length;
   const role = session?.user.role;
   const isOwner = role === "Chủ quán";
   const visibleNavItems = NAV_ITEMS.filter((item) => canAccessNavItem(item, role));
@@ -239,27 +223,6 @@ export function AppLayout() {
                 </TooltipTrigger>
                 <TooltipContent>Quét mã QR bộ game</TooltipContent>
               </Tooltip>
-              {isOwner ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="relative rounded-xl"
-                      asChild
-                      aria-label="Thông báo"
-                    >
-                      <Link to="/app/notifications">
-                        <Bell className="h-4.5 w-4.5" />
-                        {unread > 0 ? (
-                          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" />
-                        ) : null}
-                      </Link>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Trung tâm thông báo</TooltipContent>
-                </Tooltip>
-              ) : null}
               <div className="ml-1 flex items-center gap-2">
                 <Avatar className="h-9 w-9">
                   <AvatarFallback className="bg-primary/12 text-xs font-semibold text-primary">
@@ -283,7 +246,7 @@ export function AppLayout() {
       </div>
 
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 backdrop-blur lg:hidden">
-        <div className={cn("grid", isOwner ? "grid-cols-5" : "grid-cols-4")}>
+        <div className="grid grid-cols-4">
           {mobileItems.map((item) => {
             const active = item.exact ? pathname === item.to : pathname.startsWith(item.to);
             return (

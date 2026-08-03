@@ -16,7 +16,6 @@ import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppAdvisorRouteImport } from './routes/app.advisor'
 import { Route as AppChecklistRouteImport } from './routes/app.checklist'
 import { Route as AppHandoverRouteImport } from './routes/app.handover'
-import { Route as AppNotificationsRouteImport } from './routes/app.notifications'
 import { Route as AppReportsRouteImport } from './routes/app.reports'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppStaffRouteImport } from './routes/app.staff'
@@ -59,11 +58,6 @@ const AppHandoverRoute = AppHandoverRouteImport.update({
   path: '/handover',
   getParentRoute: () => AppRoute,
 } as any)
-const AppNotificationsRoute = AppNotificationsRouteImport.update({
-  id: '/notifications',
-  path: '/notifications',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppReportsRoute = AppReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
@@ -102,7 +96,6 @@ export interface FileRoutesByFullPath {
   '/app/advisor': typeof AppAdvisorRoute
   '/app/checklist': typeof AppChecklistRoute
   '/app/handover': typeof AppHandoverRoute
-  '/app/notifications': typeof AppNotificationsRoute
   '/app/reports': typeof AppReportsRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/staff': typeof AppStaffRoute
@@ -117,7 +110,6 @@ export interface FileRoutesByTo {
   '/app/advisor': typeof AppAdvisorRoute
   '/app/checklist': typeof AppChecklistRoute
   '/app/handover': typeof AppHandoverRoute
-  '/app/notifications': typeof AppNotificationsRoute
   '/app/reports': typeof AppReportsRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/staff': typeof AppStaffRoute
@@ -134,7 +126,6 @@ export interface FileRoutesById {
   '/app/advisor': typeof AppAdvisorRoute
   '/app/checklist': typeof AppChecklistRoute
   '/app/handover': typeof AppHandoverRoute
-  '/app/notifications': typeof AppNotificationsRoute
   '/app/reports': typeof AppReportsRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/staff': typeof AppStaffRoute
@@ -152,7 +143,6 @@ export interface FileRouteTypes {
     | '/app/advisor'
     | '/app/checklist'
     | '/app/handover'
-    | '/app/notifications'
     | '/app/reports'
     | '/app/settings'
     | '/app/staff'
@@ -167,7 +157,6 @@ export interface FileRouteTypes {
     | '/app/advisor'
     | '/app/checklist'
     | '/app/handover'
-    | '/app/notifications'
     | '/app/reports'
     | '/app/settings'
     | '/app/staff'
@@ -183,7 +172,6 @@ export interface FileRouteTypes {
     | '/app/advisor'
     | '/app/checklist'
     | '/app/handover'
-    | '/app/notifications'
     | '/app/reports'
     | '/app/settings'
     | '/app/staff'
@@ -250,13 +238,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppHandoverRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/notifications': {
-      id: '/app/notifications'
-      path: '/notifications'
-      fullPath: '/app/notifications'
-      preLoaderRoute: typeof AppNotificationsRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/app/reports': {
       id: '/app/reports'
       path: '/reports'
@@ -306,7 +287,6 @@ interface AppRouteChildren {
   AppAdvisorRoute: typeof AppAdvisorRoute
   AppChecklistRoute: typeof AppChecklistRoute
   AppHandoverRoute: typeof AppHandoverRoute
-  AppNotificationsRoute: typeof AppNotificationsRoute
   AppReportsRoute: typeof AppReportsRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppStaffRoute: typeof AppStaffRoute
@@ -320,7 +300,6 @@ const AppRouteChildren: AppRouteChildren = {
   AppAdvisorRoute: AppAdvisorRoute,
   AppChecklistRoute: AppChecklistRoute,
   AppHandoverRoute: AppHandoverRoute,
-  AppNotificationsRoute: AppNotificationsRoute,
   AppReportsRoute: AppReportsRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppStaffRoute: AppStaffRoute,
