@@ -43,7 +43,7 @@ Dữ liệu nghiệp vụ được lưu trên trình duyệt bằng `localStorag
 ## ✨ Tính năng chính
 
 - Dashboard tổng quan game, bàn chơi, sự cố, cảnh báo cần xử lý và hoạt động gần đây.
-- Kho game: tìm kiếm, lọc, thêm game, xem chi tiết, cập nhật trạng thái và QR mô phỏng.
+- Kho game: tìm kiếm, lọc, thêm game, xem chi tiết, cập nhật trạng thái, tạo và tải mã QR thật.
 - Khai báo và chỉnh sửa danh sách linh kiện chuẩn; kiểm tra trạng thái đầy đủ, thiếu hoặc hư hỏng khi nhận lại game.
 - Quản lý bàn: trạng thái, số khách, game đang chơi, nhân viên phụ trách và thời gian phiên.
 - Quy trình giao game, nhận lại game và chuyển game sang bảo trì.
@@ -75,6 +75,7 @@ Dữ liệu nghiệp vụ được lưu trên trình duyệt bằng `localStorag
 | ![Recharts](https://img.shields.io/badge/Recharts-22B5BF?style=flat-square&logo=chartdotjs&logoColor=white) | 2.15 | Biểu đồ báo cáo 7, 14 và 30 ngày |
 | ![Lucide](https://img.shields.io/badge/Lucide-111827?style=flat-square&logo=lucide&logoColor=F56565) | 0.575 | Icon trong giao diện |
 | ![Sonner](https://img.shields.io/badge/Sonner-111827?style=flat-square) | 2.0 | Toast phản hồi sau thao tác |
+| QRCode React | 4.2 | Tạo mã QR game trên frontend |
 | ![Web Storage](https://img.shields.io/badge/localStorage-E34F26?style=flat-square&logo=html5&logoColor=white) | Browser API | Lưu dữ liệu và session demo trên trình duyệt |
 
 <a id="yeu-cau-moi-truong"></a>
@@ -142,10 +143,12 @@ Nếu lệnh sao chép không phù hợp với hệ điều hành, có thể t�
 ```env
 GEMINI_API_KEY=your-gemini-api-key
 GEMINI_MODEL=gemini-3.6-flash
+VITE_PUBLIC_APP_URL=https://board-game-os.vercel.app
 ```
 
 - `GEMINI_API_KEY`: API key lấy từ Google AI Studio.
 - `GEMINI_MODEL`: model Gemini muốn sử dụng. Nếu bỏ trống, code mặc định dùng `gemini-3.6-flash`.
+- `VITE_PUBLIC_APP_URL`: URL công khai dùng trong mã QR game. Có thể bỏ trống để dùng domain đang mở; biến này không phải secret.
 - Nếu model trên không khả dụng với tài khoản Google hiện tại, thay bằng model được Google AI Studio cung cấp cho API key đó.
 
 <a id="chay-thu-local"></a>
@@ -259,7 +262,9 @@ Tab **Nhận lại game**:
 3. Nhập chính xác số lượng thiếu hoặc mô tả tình trạng hư hỏng.
 4. Hoàn tất nhận game hoặc chuyển sang xử lý sự cố/bảo trì.
 
-QR scanner hiện là mô phỏng: chọn một game trong dialog thay vì sử dụng camera thật.
+Mỗi game có mã QR thật dẫn đến trang chi tiết và có thể tải xuống dạng PNG. QR scanner trong ứng dụng vẫn mô phỏng bằng cách chọn game trong dialog để buổi demo không phụ thuộc camera.
+
+QR tạo ở localhost sẽ chứa URL localhost và điện thoại khác không truy cập được. Để quét bằng điện thoại, sử dụng bản Vercel hoặc cấu hình `VITE_PUBLIC_APP_URL` thành một địa chỉ có thể truy cập trong mạng nội bộ.
 
 ### 6. Kiểm tra linh kiện
 

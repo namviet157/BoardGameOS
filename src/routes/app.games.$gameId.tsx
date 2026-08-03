@@ -7,6 +7,7 @@ import { GameThumb } from "@/components/bgos/GameThumb";
 import { GameImagePicker } from "@/components/bgos/GameImagePicker";
 import { GameChecklistEditor } from "@/components/bgos/GameChecklistEditor";
 import { ComponentInspectionForm } from "@/components/bgos/ComponentInspectionForm";
+import { GameQrCode } from "@/components/bgos/GameQrCode";
 import { GameStatusBadge } from "@/components/bgos/StatusBadge";
 import { ConfirmActionDialog } from "@/components/bgos/ConfirmActionDialog";
 import { Button } from "@/components/ui/button";
@@ -238,10 +239,15 @@ function GameDetail() {
           </div>
 
           <div className="card-soft p-5 text-center">
-            <div className="mx-auto flex h-32 w-32 items-center justify-center rounded-xl border border-border bg-muted">
-              <QrCode className="h-20 w-20" />
-            </div>
-            <p className="mt-3 text-sm text-muted-foreground">Mã QR: {game.code}</p>
+            <GameQrCode
+              gameId={game.id}
+              gameCode={game.code}
+              gameName={game.name}
+              size={160}
+              showDownload
+            />
+            <p className="mt-3 text-sm font-medium">{game.name}</p>
+            <p className="text-xs text-muted-foreground">Mã kho: {game.code}</p>
           </div>
 
           <div className="card-soft p-5">

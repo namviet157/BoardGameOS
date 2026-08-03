@@ -150,3 +150,23 @@
     transform: none;
   }
 }
+
+@utility qr-scan-line {
+  animation: qr-scan 1.35s ease-in-out infinite;
+}
+
+@keyframes qr-scan {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(8.5rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qr-scan-line {
+    animation: none;
+  }
+}
