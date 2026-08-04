@@ -3,6 +3,7 @@ import type {
   AppNotification,
   ComponentCondition,
   Game,
+  GameRules,
   PlayTable,
   ReportDay,
   Staff,
@@ -46,6 +47,185 @@ const comp = (
   note,
 });
 
+const GAME_RULES: Record<string, GameRules> = {
+  g1: {
+    objective:
+      "Xây dựng khu định cư, thành phố và đường để trở thành người đầu tiên đạt 10 điểm chiến thắng.",
+    setup: [
+      "Ghép bản đồ, đặt số lên các ô địa hình và để quân cướp ở sa mạc.",
+      "Mỗi người lần lượt đặt 2 khu định cư cùng 2 con đường và nhận tài nguyên từ vị trí thứ hai.",
+    ],
+    gameplay: [
+      "Đầu lượt, gieo hai xúc xắc; các ô có số tương ứng sản xuất tài nguyên cho người có công trình giáp ô đó.",
+      "Nếu ra 7, người giữ quá 7 lá bỏ một nửa, sau đó người chơi di chuyển quân cướp và lấy ngẫu nhiên một lá từ đối thủ phù hợp.",
+      "Trong lượt, người chơi có thể trao đổi tài nguyên rồi xây đường, khu định cư, thành phố hoặc mua thẻ phát triển.",
+    ],
+    ending: "Người đầu tiên có ít nhất 10 điểm chiến thắng trong lượt của mình thắng game.",
+    notes: ["Áp dụng luật Catan bản cơ bản, không bao gồm bản mở rộng."],
+  },
+  g2: {
+    objective: "Ghi nhiều điểm nhất bằng cách xây các tuyến đường sắt và hoàn thành vé hành trình.",
+    setup: [
+      "Mỗi người nhận toa tàu, quân tính điểm, 4 thẻ toa tàu và các vé hành trình ban đầu.",
+      "Mỗi người giữ số vé tối thiểu theo luật rồi trả các vé không chọn về hộp.",
+    ],
+    gameplay: [
+      "Mỗi lượt chọn một việc: rút thẻ toa tàu, dùng bộ thẻ cùng màu để chiếm một tuyến, hoặc rút thêm vé hành trình.",
+      "Chiếm tuyến sẽ ghi điểm theo độ dài; vé hành trình yêu cầu nối được hai thành phố ghi trên vé.",
+      "Tuyến đã bị chiếm thường không thể được người khác sử dụng, trừ các tuyến đôi khi đủ số người chơi.",
+    ],
+    ending:
+      "Khi một người còn 2 toa tàu trở xuống, mọi người chơi thêm một lượt; cộng điểm tuyến và vé, người nhiều điểm nhất thắng.",
+  },
+  g3: {
+    objective:
+      "Trở thành người đầu tiên đánh hết bài trên tay và ghi điểm từ bài còn lại của đối thủ.",
+    setup: ["Chia mỗi người 7 lá, đặt phần còn lại thành chồng rút và lật một lá mở đầu chồng bỏ."],
+    gameplay: [
+      "Đến lượt, đánh một lá cùng màu, cùng số hoặc cùng biểu tượng với lá trên cùng; cũng có thể dùng lá Wild phù hợp.",
+      "Nếu không đánh được, rút một lá và có thể đánh ngay nếu lá đó hợp lệ.",
+      "Khi còn một lá, phải hô UNO; nếu bị phát hiện trước lượt kế tiếp thì phải rút phạt.",
+      "Các lá hành động đổi chiều, bỏ lượt, bắt rút hoặc đổi màu theo biểu tượng trên lá.",
+    ],
+    ending:
+      "Ván kết thúc khi một người hết bài; có thể chơi một ván thắng ngay hoặc cộng điểm qua nhiều ván theo luật cơ bản.",
+  },
+  g4: {
+    objective: "Tránh rút phải Exploding Kitten và trở thành người sống sót cuối cùng.",
+    setup: [
+      "Mỗi người nhận 1 lá Defuse và 7 lá khác.",
+      "Trộn số lá Exploding Kitten ít hơn số người chơi một lá cùng các lá Defuse còn lại vào chồng rút.",
+    ],
+    gameplay: [
+      "Trong lượt, người chơi có thể đánh không giới hạn lá hành động rồi phải rút một lá để kết thúc lượt.",
+      "Nếu rút Exploding Kitten, người chơi phải dùng Defuse và đặt lại lá nổ vào chồng rút; nếu không có Defuse thì bị loại.",
+      "Các lá hành động cho phép bỏ lượt, xem trước, xáo bài, yêu cầu người khác hoặc lấy bài theo hiệu ứng ghi trên lá.",
+    ],
+    ending: "Người duy nhất chưa bị loại thắng game.",
+  },
+  g5: {
+    objective:
+      "Ghi điểm bằng cách đưa ra gợi ý vừa đủ để một số, nhưng không phải tất cả, người chơi nhận ra thẻ tranh của mình.",
+    setup: [
+      "Mỗi người nhận 6 thẻ tranh, một quân tính điểm và bộ thẻ hoặc token bình chọn tương ứng.",
+      "Chọn một người làm người kể chuyện đầu tiên.",
+    ],
+    gameplay: [
+      "Người kể chuyện chọn bí mật một thẻ, đưa ra một câu, từ hoặc âm thanh gợi ý rồi đặt úp thẻ xuống.",
+      "Mỗi người khác chọn một thẻ trên tay phù hợp với gợi ý; người kể chuyện trộn tất cả rồi lật ngửa.",
+      "Những người không kể chuyện bí mật bình chọn thẻ của người kể chuyện và sau đó tính điểm.",
+      "Nếu tất cả hoặc không ai đoán đúng, người kể chuyện không có điểm và những người khác được 2 điểm; trường hợp còn lại người kể chuyện cùng người đoán đúng được 3 điểm. Mỗi người còn nhận thêm 1 điểm cho mỗi phiếu vào thẻ của mình.",
+      "Mọi người rút lại đủ 6 thẻ và vai trò kể chuyện chuyển sang người kế tiếp.",
+    ],
+    ending: "Khi chồng thẻ hết, người có tổng điểm cao nhất thắng.",
+  },
+  g6: {
+    objective:
+      "Thu thập đá quý để mua thẻ phát triển, thu hút quý tộc và đạt nhiều điểm danh vọng nhất.",
+    setup: [
+      "Xếp ba cấp thẻ phát triển thành ba hàng, lật 4 thẻ mỗi cấp và bày token đá quý theo số người.",
+      "Lật số thẻ quý tộc bằng số người chơi cộng một.",
+    ],
+    gameplay: [
+      "Mỗi lượt chọn một việc: lấy 3 token khác màu, lấy 2 token cùng màu khi còn đủ, giữ một thẻ kèm token vàng, hoặc mua một thẻ.",
+      "Thẻ đã mua tạo giảm giá vĩnh viễn cho các lần mua sau và có thể cung cấp điểm danh vọng.",
+      "Cuối lượt, nếu đáp ứng yêu cầu của một quý tộc, người chơi nhận quý tộc đó; thông thường chỉ nhận tối đa một quý tộc mỗi lượt.",
+      "Người chơi không được giữ quá 10 token vào cuối lượt.",
+    ],
+    ending:
+      "Khi có người đạt ít nhất 15 điểm, hoàn tất vòng để mọi người có số lượt bằng nhau; người nhiều điểm nhất thắng.",
+  },
+  g7: {
+    objective: "Đội mình đoán hết các từ khóa của đội trước đối thủ mà không chọn phải sát thủ.",
+    setup: [
+      "Chia người chơi thành hai đội, mỗi đội chọn một đội trưởng gợi ý.",
+      "Bày 25 thẻ từ thành lưới 5 × 5; hai đội trưởng xem chung một thẻ đáp án bí mật.",
+    ],
+    gameplay: [
+      "Đội trưởng nói đúng một từ gợi ý và một con số cho biết có bao nhiêu từ liên quan.",
+      "Đồng đội thảo luận và chọn từng thẻ; đoán đúng màu đội mình có thể tiếp tục, còn đoán nhầm thường kết thúc lượt.",
+      "Đội trưởng không được đưa thêm tín hiệu ngoài gợi ý hợp lệ.",
+    ],
+    ending:
+      "Đội lật hết các đặc vụ của mình trước sẽ thắng; đội chọn phải thẻ sát thủ thua ngay lập tức.",
+  },
+  g8: {
+    objective:
+      "Phe Thiện hoàn thành 3 nhiệm vụ và bảo vệ Merlin; phe Ác làm thất bại 3 nhiệm vụ hoặc ám sát đúng Merlin.",
+    setup: [
+      "Chọn bộ nhân vật phù hợp số người, bí mật phát một vai cho mỗi người rồi thực hiện bước nhận biết phe theo hướng dẫn vai.",
+      "Đặt bảng nhiệm vụ, token biểu quyết và token kết quả nhiệm vụ ở giữa bàn.",
+    ],
+    gameplay: [
+      "Thủ lĩnh đề xuất một đội đi làm nhiệm vụ; tất cả cùng biểu quyết chấp thuận hoặc từ chối đội hình.",
+      "Nếu được chấp thuận, thành viên nhiệm vụ bí mật chọn thành công hoặc thất bại; người phe Thiện bắt buộc chọn thành công.",
+      "Nhiệm vụ thường thất bại khi có ít nhất một phiếu thất bại; ở bàn 7 người trở lên, nhiệm vụ thứ tư cần ít nhất hai phiếu thất bại.",
+      "Quyền thủ lĩnh chuyển vòng và quá nhiều đội hình liên tiếp bị từ chối sẽ giúp phe Ác thắng.",
+    ],
+    ending:
+      "Phe Ác thắng khi có 3 nhiệm vụ thất bại. Nếu phe Thiện hoàn thành 3 nhiệm vụ, Sát thủ được đoán Merlin; đoán đúng thì phe Ác thắng, sai thì phe Thiện thắng.",
+  },
+  g9: {
+    objective: "Làm các đối thủ phá sản bằng cách sở hữu bất động sản, xây nhà và thu tiền thuê.",
+    setup: [
+      "Mỗi người chọn quân cờ và nhận số tiền ban đầu theo bộ game.",
+      "Đặt thẻ tài sản, Chance, Community Chest, nhà và khách sạn cạnh bàn cờ.",
+    ],
+    gameplay: [
+      "Trong lượt, gieo xúc xắc, di chuyển và xử lý ô dừng: mua tài sản, trả tiền thuê, rút thẻ, nộp thuế hoặc vào tù.",
+      "Nếu không mua tài sản chưa có chủ, ngân hàng đưa tài sản ra đấu giá.",
+      "Sở hữu đủ một nhóm màu cho phép xây nhà và khách sạn đồng đều để tăng tiền thuê.",
+      "Người chơi có thể giao dịch, thế chấp tài sản và phải xử lý phá sản nếu không trả được nợ.",
+    ],
+    ending: "Người chơi cuối cùng chưa phá sản thắng game.",
+    notes: ["Dùng luật Monopoly tiêu chuẩn, không áp dụng tiền thưởng tại ô Free Parking."],
+  },
+  g10: {
+    objective:
+      "Loại hết ảnh hưởng của đối thủ và trở thành người cuối cùng còn ít nhất một thẻ nhân vật úp.",
+    setup: [
+      "Mỗi người nhận 2 đồng xu và 2 thẻ nhân vật úp; phần thẻ còn lại tạo thành Court deck.",
+    ],
+    gameplay: [
+      "Mỗi lượt thực hiện một hành động chung hoặc tuyên bố hành động của một nhân vật, kể cả khi không thật sự giữ nhân vật đó.",
+      "Người khác có thể thách thức tuyên bố hoặc dùng nhân vật phù hợp để chặn hành động.",
+      "Người thua thách thức phải lật một ảnh hưởng; thẻ đã lật không còn khả năng sử dụng.",
+      "Có từ 7 xu phải Coup; Coup tốn 7 xu và buộc mục tiêu mất một ảnh hưởng. Người có từ 10 xu bắt buộc Coup.",
+    ],
+    ending: "Người cuối cùng còn ảnh hưởng chưa bị lật thắng game.",
+  },
+  g11: {
+    objective:
+      "Ghi nhiều điểm nhất bằng cách hoàn thiện các hàng gạch trên bức tường cá nhân và hạn chế gạch rơi xuống sàn.",
+    setup: [
+      "Mỗi người nhận một bảng cá nhân và đặt quân tính điểm ở 0.",
+      "Bày số đĩa nhà máy theo số người, đặt ngẫu nhiên 4 viên gạch lên mỗi đĩa.",
+    ],
+    gameplay: [
+      "Trong lượt, lấy tất cả gạch cùng màu từ một đĩa nhà máy hoặc khu vực giữa bàn; gạch còn lại trên đĩa được đẩy vào giữa.",
+      "Đặt gạch đã lấy vào một hàng mẫu hợp lệ; gạch không đặt được phải xuống hàng sàn và gây trừ điểm.",
+      "Khi hết gạch ở các nhà máy và giữa bàn, chuyển một gạch từ mỗi hàng mẫu hoàn chỉnh sang tường rồi tính điểm theo các gạch liền kề.",
+      "Chuẩn bị vòng mới và tiếp tục chơi.",
+    ],
+    ending:
+      "Game kết thúc sau vòng có người hoàn thành một hàng ngang trên tường; cộng điểm thưởng hàng, cột và bộ màu, người nhiều điểm nhất thắng.",
+  },
+  g12: {
+    objective: "Tạo các bộ món ăn có giá trị cao qua ba vòng draft bài và đạt tổng điểm lớn nhất.",
+    setup: [
+      "Trộn bộ bài và chia số lá theo số người; giữ kín bài trên tay.",
+      "Mỗi vòng dùng một tay bài mới từ chồng bài chung.",
+    ],
+    gameplay: [
+      "Mọi người đồng thời chọn một lá, đặt úp, cùng lật lên rồi chuyền toàn bộ bài còn lại sang người bên cạnh.",
+      "Tiếp tục chọn và chuyền đến khi hết bài trên tay.",
+      "Cuối vòng, tính điểm theo từng loại món: sashimi, tempura, dumpling, maki, nigiri và wasabi theo biểu tượng trên lá.",
+      "Giữ lại pudding đến cuối game; bỏ các lá khác rồi chia bài cho vòng tiếp theo.",
+    ],
+    ending: "Sau 3 vòng, tính thêm điểm pudding; người có tổng điểm cao nhất thắng.",
+  },
+};
+
 export const GAME_CATEGORIES = [
   "Chiến thuật",
   "Gia đình",
@@ -55,7 +235,7 @@ export const GAME_CATEGORIES = [
   "Kinh tế",
 ];
 
-export const seedGames: Game[] = [
+const gamesWithoutRules: Game[] = [
   {
     id: "g1",
     code: "BG-001",
@@ -433,6 +613,11 @@ export const seedGames: Game[] = [
     usage30d: 29,
   },
 ];
+
+export const seedGames: Game[] = gamesWithoutRules.map((game) => ({
+  ...game,
+  rules: GAME_RULES[game.id],
+}));
 
 export const seedTables: PlayTable[] = [
   { id: "t1", name: "Bàn 01", seats: 4, guests: 0, status: "empty" },

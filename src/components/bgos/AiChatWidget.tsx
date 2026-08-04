@@ -181,10 +181,10 @@ export function AiChatWidget() {
               ) : null}
               <p
                 className={cn(
-                  "max-w-[82%] whitespace-pre-wrap rounded-xl px-3 py-2 text-sm leading-6",
+                  "min-w-0 whitespace-pre-wrap break-words rounded-xl px-3 py-2 text-sm leading-6",
                   message.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-foreground",
+                    ? "max-w-[82%] bg-primary text-primary-foreground"
+                    : "flex-1 bg-muted text-foreground",
                 )}
               >
                 {message.content}

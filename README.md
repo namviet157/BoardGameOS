@@ -49,7 +49,7 @@ Dữ liệu nghiệp vụ được lưu trên trình duyệt bằng `localStorag
 - Quy trình giao game, nhận lại game và chuyển game sang bảo trì.
 - Bộ lọc tư vấn game theo số người, thời lượng, thể loại, độ tuổi, độ khó, kiểu chơi và mức tương tác.
 - Tìm kiếm toàn hệ thống theo game, bàn và nhân viên; hỗ trợ tìm tiếng Việt không dấu.
-- Chatbot Gemini hỏi đáp về toàn bộ snapshot dữ liệu BoardGameOS và gợi ý game đang sẵn sàng.
+- Chatbot Gemini hỏi đáp toàn bộ snapshot dữ liệu BoardGameOS, hướng dẫn luật cơ bản của 12 game mẫu và gợi ý game đang sẵn sàng.
 - Quản lý nhân viên, vai trò, quyền hiển thị và khóa/mở khóa tài khoản.
 - Báo cáo hoạt động theo 7, 14 hoặc 30 ngày bằng Recharts.
 - Cài đặt thông tin quán, công tắc mô phỏng tính năng tương lai và khôi phục dữ liệu mẫu.
@@ -290,13 +290,16 @@ Danh sách linh kiện chuẩn được cấu hình khi thêm game hoặc tại 
 1. Bấm biểu tượng chat ở góc dưới bên phải.
 2. Chọn một câu hỏi gợi ý hoặc nhập câu hỏi mới.
 3. Nhấn Enter hoặc nút gửi.
-4. Chatbot trả lời dựa trên snapshot hiện tại gồm game, bàn, nhân viên, giao dịch, hoạt động, cảnh báo vận hành, báo cáo và cài đặt.
+4. Chatbot trả lời dựa trên snapshot hiện tại gồm game, luật cơ bản của game mẫu, bàn, nhân viên, giao dịch, hoạt động, cảnh báo vận hành, báo cáo và cài đặt.
+5. Các câu trả lời có nhiều đối tượng được tách thành từng dòng hoặc nhóm để dễ theo dõi trên desktop và mobile.
 
 Ví dụ câu hỏi:
 
 - `Tóm tắt tình hình quán hiện tại.`
 - `Bàn nào đang cần hỗ trợ?`
 - `Game nào đang chờ kiểm tra linh kiện?`
+- `Cách chơi Dixit như thế nào?`
+- `Hãy nêu trạng thái của từng game.`
 - `Gợi ý game có sẵn cho 6 người, dưới 30 phút và dễ học.`
 - `Ba việc nào cần ưu tiên xử lý?`
 

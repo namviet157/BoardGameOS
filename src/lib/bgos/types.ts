@@ -32,6 +32,14 @@ export interface GameIncident {
   details?: string;
 }
 
+export interface GameRules {
+  objective: string;
+  setup: string[];
+  gameplay: string[];
+  ending: string;
+  notes?: string[];
+}
+
 export interface Game {
   id: string;
   code: string;
@@ -44,6 +52,7 @@ export interface Game {
   status: GameStatus;
   location: string;
   description: string;
+  rules?: GameRules;
   age: number;
   interaction: "Thấp" | "Vừa" | "Cao";
   mode: "Cạnh tranh" | "Hợp tác";
