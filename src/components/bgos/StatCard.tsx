@@ -23,14 +23,14 @@ export function StatCard({
   }[tone];
 
   return (
-    <div className="card-soft card-hover p-4 sm:p-5">
+    <div className="card-soft p-4 sm:p-5">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-sm text-muted-foreground">{label}</p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight">{value}</p>
+          <p className="mt-2 text-3xl font-semibold">{value}</p>
           {hint ? <p className="mt-1 text-xs text-muted-foreground">{hint}</p> : null}
         </div>
-        <span className={cn("flex h-10 w-10 items-center justify-center rounded-xl", toneClass)}>
+        <span className={cn("flex h-10 w-10 items-center justify-center rounded-lg", toneClass)}>
           <Icon className="h-5 w-5" />
         </span>
       </div>
@@ -50,8 +50,8 @@ export function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/40 px-6 py-12 text-center">
-      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-card text-muted-foreground">
+    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-muted/40 px-6 py-12 text-center">
+      <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-card text-muted-foreground">
         <Icon className="h-6 w-6" />
       </span>
       <p className="mt-4 font-medium">{title}</p>
@@ -73,7 +73,7 @@ export function PageHeader({
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{title}</h1>
+        <h1 className="text-2xl font-semibold sm:text-3xl">{title}</h1>
         {description ? <p className="mt-1 text-sm text-muted-foreground">{description}</p> : null}
       </div>
       {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}

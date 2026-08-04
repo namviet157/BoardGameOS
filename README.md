@@ -43,7 +43,7 @@ Dữ liệu nghiệp vụ được lưu trên trình duyệt bằng `localStorag
 ## ✨ Tính năng chính
 
 - Dashboard tổng quan game, bàn chơi, sự cố, cảnh báo cần xử lý và hoạt động gần đây.
-- Kho game: tìm kiếm, lọc, thêm game, xem chi tiết, cập nhật trạng thái, tạo và tải mã QR thật.
+- Kho game: tìm kiếm, lọc, thêm game, xem chi tiết, ảnh bìa trực quan, cập nhật trạng thái, tạo và tải mã QR thật.
 - Khai báo và chỉnh sửa danh sách linh kiện chuẩn; kiểm tra trạng thái đầy đủ, thiếu hoặc hư hỏng khi nhận lại game.
 - Quản lý bàn: trạng thái, số khách, game đang chơi, nhân viên phụ trách và thời gian phiên.
 - Quy trình giao game, nhận lại game và chuyển game sang bảo trì.
@@ -235,6 +235,8 @@ Nhân viên sử dụng các chức năng vận hành:
 4. Nếu bỏ trống checklist, xác nhận lưu và bổ sung sau tại trang chi tiết game.
 5. Bấm **Chi tiết** để tạo/chỉnh sửa danh sách linh kiện chuẩn, xem lịch sử, sự cố, ghi chú hoặc thay/xóa ảnh bìa.
 6. Dùng nút bảo trì để chuyển game sang bảo trì sau khi xác nhận.
+
+Mười hai game mẫu có ảnh bìa WebP cục bộ để bản demo không phụ thuộc mạng. Ảnh người dùng tải lên được ưu tiên, tiếp tục lưu trong `localStorage`; nguồn ảnh mẫu được ghi tại [`doc/game_cover_sources.md`](doc/game_cover_sources.md).
 
 ### 4. Quản lý bàn và phiên chơi
 

@@ -222,7 +222,7 @@ function StaffPage() {
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">{s.shift}</TableCell>
                 <TableCell>{s.actionsToday}</TableCell>
-                <TableCell className="text-sm text-muted-foreground">
+                <TableCell className="text-sm text-muted-foreground" suppressHydrationWarning>
                   {timeAgo(s.lastActive)}
                 </TableCell>
                 <TableCell className="text-right">

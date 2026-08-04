@@ -140,6 +140,7 @@ export function QrScanDialog({
                     emoji={game.emoji}
                     tone={game.tone}
                     imageDataUrl={game.imageDataUrl}
+                    coverImageUrl={game.coverImageUrl}
                     alt={`Ảnh bìa ${game.name}`}
                     size="sm"
                   />

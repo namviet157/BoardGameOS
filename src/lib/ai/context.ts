@@ -3,7 +3,11 @@ import type { Game } from "@/lib/bgos/types";
 
 type AiDataSource = Omit<AiDataSnapshot, "games"> & { games: Game[] };
 
-function removeGameImage({ imageDataUrl: _imageDataUrl, ...game }: Game) {
+function removeGameImage({
+  imageDataUrl: _imageDataUrl,
+  coverImageUrl: _coverImageUrl,
+  ...game
+}: Game) {
   return game;
 }
 

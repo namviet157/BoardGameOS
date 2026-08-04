@@ -9,7 +9,7 @@ import type {
   Transaction,
 } from "@/lib/bgos/types";
 
-export type AiGameSnapshot = Omit<Game, "imageDataUrl">;
+export type AiGameSnapshot = Omit<Game, "imageDataUrl" | "coverImageUrl">;
 
 export interface AiDataSnapshot {
   games: AiGameSnapshot[];

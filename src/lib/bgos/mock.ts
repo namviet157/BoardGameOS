@@ -226,6 +226,21 @@ const GAME_RULES: Record<string, GameRules> = {
   },
 };
 
+const GAME_COVER_URLS: Record<string, string> = {
+  g1: "/game-covers/catan.webp",
+  g2: "/game-covers/ticket-to-ride.webp",
+  g3: "/game-covers/uno.webp",
+  g4: "/game-covers/exploding-kittens.webp",
+  g5: "/game-covers/dixit.webp",
+  g6: "/game-covers/splendor.webp",
+  g7: "/game-covers/codenames.webp",
+  g8: "/game-covers/avalon.webp",
+  g9: "/game-covers/monopoly.webp",
+  g10: "/game-covers/coup.webp",
+  g11: "/game-covers/azul.webp",
+  g12: "/game-covers/sushi-go.webp",
+};
+
 export const GAME_CATEGORIES = [
   "Chiến thuật",
   "Gia đình",
@@ -617,6 +632,7 @@ const gamesWithoutRules: Game[] = [
 export const seedGames: Game[] = gamesWithoutRules.map((game) => ({
   ...game,
   rules: GAME_RULES[game.id],
+  coverImageUrl: GAME_COVER_URLS[game.id],
 }));
 
 export const seedTables: PlayTable[] = [

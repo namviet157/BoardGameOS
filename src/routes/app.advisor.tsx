@@ -193,6 +193,7 @@ function AdvisorPage() {
                   emoji={game.emoji}
                   tone={game.tone}
                   imageDataUrl={game.imageDataUrl}
+                  coverImageUrl={game.coverImageUrl}
                   alt={`Ảnh bìa ${game.name}`}
                 />
                 <div className="flex-1">

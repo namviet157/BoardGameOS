@@ -200,6 +200,7 @@ function GameDetail() {
               emoji={game.emoji}
               tone={game.tone}
               imageDataUrl={game.imageDataUrl}
+              coverImageUrl={game.coverImageUrl}
               alt={`Ảnh bìa ${game.name}`}
               size="lg"
             />
@@ -363,7 +364,7 @@ function GameDetail() {
                   {game.history.map((h) => (
                     <li key={h.id} className="rounded-xl border border-border p-3">
                       <p className="text-sm">{h.label}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground" suppressHydrationWarning>
                         {h.staff} · {timeAgo(h.at)}
                       </p>
                     </li>
@@ -387,7 +388,7 @@ function GameDetail() {
                       {i.details ? (
                         <p className="mt-1 text-sm text-muted-foreground">{i.details}</p>
                       ) : null}
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground" suppressHydrationWarning>
                         {i.resolved ? "Đã xử lý" : "Đang xử lý"} · Mức độ{" "}
                         {i.level === "high"
                           ? "nghiêm trọng"

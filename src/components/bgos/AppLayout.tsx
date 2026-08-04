@@ -30,21 +30,41 @@ type NavItem = {
   to: string;
   label: string;
   icon: typeof Boxes;
+  group: "Vận hành" | "Kho game" | "Quản trị";
   exact?: boolean;
   ownerOnly?: boolean;
 };
 
 export const NAV_ITEMS: NavItem[] = [
-  { to: "/app", label: "Tổng quan", icon: LayoutDashboard, exact: true },
-  { to: "/app/games", label: "Kho game", icon: Boxes },
-  { to: "/app/tables", label: "Bàn chơi", icon: Grid2x2 },
-  { to: "/app/handover", label: "Giao nhận game", icon: Repeat },
-  { to: "/app/checklist", label: "Kiểm tra linh kiện", icon: ClipboardCheck },
-  { to: "/app/advisor", label: "Tư vấn game", icon: Sparkles },
-  { to: "/app/staff", label: "Nhân viên", icon: Users, ownerOnly: true },
-  { to: "/app/reports", label: "Báo cáo", icon: TrendingUp, ownerOnly: true },
-  { to: "/app/settings", label: "Cài đặt", icon: Settings, ownerOnly: true },
+  { to: "/app", label: "Tổng quan", icon: LayoutDashboard, group: "Vận hành", exact: true },
+  { to: "/app/tables", label: "Bàn chơi", icon: Grid2x2, group: "Vận hành" },
+  { to: "/app/handover", label: "Giao nhận game", icon: Repeat, group: "Vận hành" },
+  { to: "/app/games", label: "Kho game", icon: Boxes, group: "Kho game" },
+  {
+    to: "/app/checklist",
+    label: "Kiểm tra linh kiện",
+    icon: ClipboardCheck,
+    group: "Kho game",
+  },
+  { to: "/app/advisor", label: "Tư vấn game", icon: Sparkles, group: "Kho game" },
+  { to: "/app/staff", label: "Nhân viên", icon: Users, group: "Quản trị", ownerOnly: true },
+  {
+    to: "/app/reports",
+    label: "Báo cáo",
+    icon: TrendingUp,
+    group: "Quản trị",
+    ownerOnly: true,
+  },
+  {
+    to: "/app/settings",
+    label: "Cài đặt",
+    icon: Settings,
+    group: "Quản trị",
+    ownerOnly: true,
+  },
 ];
+
+const NAV_GROUPS: NavItem["group"][] = ["Vận hành", "Kho game", "Quản trị"];
 
 const MOBILE_ITEM_PATHS = ["/app", "/app/games", "/app/handover", "/app/tables"];
 
@@ -57,7 +77,7 @@ function canAccessNavItem(item: NavItem, role?: string) {
 function Brand() {
   return (
     <Link to="/" className="flex items-center gap-2.5">
-      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
         <Grid2x2 className="h-4.5 w-4.5" />
       </span>
       <span className="text-base font-semibold tracking-tight">BoardGameOS</span>
@@ -65,37 +85,68 @@ function Brand() {
   );
 }
 
-function NavList({ items, onNavigate }: { items: NavItem[]; onNavigate?: () => void }) {
+function NavList({
+  items,
+  onNavigate,
+  showGroups = false,
+  pendingCount = 0,
+}: {
+  items: NavItem[];
+  onNavigate?: () => void;
+  showGroups?: boolean;
+  pendingCount?: number;
+}) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const groups = showGroups
+    ? NAV_GROUPS.map((label) => ({
+        label,
+        items: items.filter((item) => item.group === label),
+      })).filter((group) => group.items.length > 0)
+    : [{ label: "", items }];
 
   return (
-    <nav className="space-y-1">
-      {items.map((item) => {
-        const active = item.exact ? pathname === item.to : pathname.startsWith(item.to);
-        return (
-          <Link
-            key={item.to}
-            to={item.to as never}
-            onClick={onNavigate}
-            className={cn(
-              "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
-              active
-                ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground",
-            )}
-          >
-            <item.icon className="h-4.5 w-4.5" />
-            <span className="flex-1">{item.label}</span>
-          </Link>
-        );
-      })}
+    <nav className="space-y-5">
+      {groups.map((group) => (
+        <div key={group.label || "all"} className="space-y-1">
+          {group.label ? (
+            <p className="px-3 pb-1 text-[11px] font-semibold uppercase text-muted-foreground">
+              {group.label}
+            </p>
+          ) : null}
+          {group.items.map((item) => {
+            const active = item.exact ? pathname === item.to : pathname.startsWith(item.to);
+            const showPendingCount = item.to === "/app/checklist" && pendingCount > 0;
+            return (
+              <Link
+                key={item.to}
+                to={item.to as never}
+                onClick={onNavigate}
+                className={cn(
+                  "relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                  active
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-primary"
+                    : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground",
+                )}
+              >
+                <item.icon className="h-4.5 w-4.5" />
+                <span className="flex-1">{item.label}</span>
+                {showPendingCount ? (
+                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-warning/18 px-1.5 text-[11px] font-semibold text-warning-foreground">
+                    {pendingCount}
+                  </span>
+                ) : null}
+              </Link>
+            );
+          })}
+        </div>
+      ))}
     </nav>
   );
 }
 
 export function AppLayout() {
   const navigate = useNavigate();
-  const { hydrated, session, logout, settings } = useStore();
+  const { hydrated, session, logout, settings, games } = useStore();
   const [scanOpen, setScanOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -112,6 +163,7 @@ export function AppLayout() {
   );
   const accessDenied = hydrated && !isOwner && isOwnerOnlyPath;
   const hideRouteContent = isOwnerOnlyPath && (!hydrated || accessDenied);
+  const pendingCount = games.filter((game) => game.status === "pending_check").length;
 
   useEffect(() => {
     if (!accessDenied) return;
@@ -147,11 +199,11 @@ export function AppLayout() {
           <Brand />
         </div>
         <div className="mt-4 flex-1 overflow-y-auto">
-          <NavList items={visibleNavItems} />
+          <NavList items={visibleNavItems} showGroups pendingCount={pendingCount} />
         </div>
         <Button
           variant="ghost"
-          className="justify-start gap-3 rounded-xl text-muted-foreground"
+          className="justify-start gap-3 rounded-lg text-muted-foreground"
           onClick={() => {
             logout();
             navigate({ to: "/login" });
@@ -175,7 +227,11 @@ export function AppLayout() {
                   <Brand />
                 </div>
                 <div className="mt-4">
-                  <NavList items={visibleNavItems} onNavigate={() => setMobileOpen(false)} />
+                  <NavList
+                    items={visibleNavItems}
+                    onNavigate={() => setMobileOpen(false)}
+                    pendingCount={pendingCount}
+                  />
                 </div>
               </SheetContent>
             </Sheet>
@@ -187,7 +243,7 @@ export function AppLayout() {
 
             <button
               type="button"
-              className="relative ml-auto hidden h-9 w-full max-w-xs items-center rounded-xl border border-input bg-background pl-9 pr-3 text-left text-sm text-muted-foreground shadow-sm transition-colors hover:bg-accent md:flex"
+              className="relative ml-auto hidden h-9 w-full max-w-xs items-center rounded-lg border border-input bg-card pl-9 pr-3 text-left text-sm text-muted-foreground shadow-sm transition-colors hover:border-primary/40 md:flex"
               onClick={() => setSearchOpen(true)}
             >
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -241,7 +297,9 @@ export function AppLayout() {
         </header>
 
         <main key={pathname} className="page-enter px-4 pb-24 pt-6 sm:px-6 lg:pb-10">
-          {hideRouteContent ? null : <Outlet />}
+          <div className="mx-auto w-full max-w-[1600px]">
+            {hideRouteContent ? null : <Outlet />}
+          </div>
         </main>
       </div>
 

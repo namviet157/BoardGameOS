@@ -58,6 +58,7 @@ function normalizeStoredState(stored: Partial<State>): State {
     games: merged.games.map((game) => ({
       ...game,
       rules: game.rules ?? seedGameById.get(game.id)?.rules,
+      coverImageUrl: game.coverImageUrl ?? seedGameById.get(game.id)?.coverImageUrl,
       components: game.components.map((component) => {
         const legacy = component as LegacyComponent;
         const condition =

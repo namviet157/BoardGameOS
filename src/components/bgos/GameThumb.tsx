@@ -6,6 +6,7 @@ export function GameThumb({
   emoji,
   tone,
   imageDataUrl,
+  coverImageUrl,
   alt,
   size = "md",
   className,
@@ -13,17 +14,19 @@ export function GameThumb({
   emoji: string;
   tone: number;
   imageDataUrl?: string;
+  coverImageUrl?: string;
   alt?: string;
   size?: "sm" | "md" | "lg";
   className?: string;
 }) {
   const [failedImage, setFailedImage] = useState<string | null>(null);
   const sizes = {
-    sm: "h-10 w-10 text-lg rounded-xl",
-    md: "h-14 w-14 text-2xl rounded-2xl",
-    lg: "h-40 w-full text-6xl rounded-2xl",
+    sm: "h-11 w-11 text-lg rounded-lg",
+    md: "h-16 w-14 text-2xl rounded-lg",
+    lg: "h-52 w-full text-6xl rounded-lg",
   };
-  const showImage = Boolean(imageDataUrl && failedImage !== imageDataUrl);
+  const imageSource = imageDataUrl || coverImageUrl;
+  const showImage = Boolean(imageSource && failedImage !== imageSource);
   return (
     <div
       className={cn(
@@ -35,10 +38,10 @@ export function GameThumb({
     >
       {showImage ? (
         <img
-          src={imageDataUrl}
+          src={imageSource}
           alt={alt ?? "Ảnh bìa board game"}
           className="h-full w-full object-contain"
-          onError={() => setFailedImage(imageDataUrl ?? null)}
+          onError={() => setFailedImage(imageSource ?? null)}
         />
       ) : (
         <span aria-hidden>{emoji}</span>

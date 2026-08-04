@@ -10,7 +10,7 @@ export const GAME_STATUS_LABEL: Record<GameStatus, string> = {
 
 export const GAME_STATUS_CLASS: Record<GameStatus, string> = {
   available: "bg-success/12 text-success border-success/30",
-  in_use: "bg-primary/12 text-primary border-primary/30",
+  in_use: "bg-secondary text-secondary-foreground border-secondary-foreground/20",
   pending_check: "bg-gold/20 text-gold-foreground border-gold/50",
   missing_parts: "bg-destructive/12 text-destructive border-destructive/30",
   maintenance: "bg-muted text-muted-foreground border-border",
@@ -26,7 +26,7 @@ export const TABLE_STATUS_LABEL: Record<TableStatus, string> = {
 
 export const TABLE_STATUS_CLASS: Record<TableStatus, string> = {
   empty: "bg-success/12 text-success border-success/30",
-  playing: "bg-primary/12 text-primary border-primary/30",
+  playing: "bg-secondary text-secondary-foreground border-secondary-foreground/20",
   support: "bg-gold/25 text-gold-foreground border-gold/60",
   issue: "bg-destructive/12 text-destructive border-destructive/30",
   cleaning: "bg-muted text-muted-foreground border-border",
