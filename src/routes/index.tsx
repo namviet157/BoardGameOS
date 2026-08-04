@@ -1,283 +1,792 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  ArrowRight,
-  Boxes,
-  ClipboardCheck,
-  Grid2x2,
-  QrCode,
-  TrendingUp,
   AlertTriangle,
-  NotebookPen,
-  MapPinned,
-  Eye,
+  ArrowRight,
+  Bot,
+  Boxes,
+  Building2,
   Check,
+  CircleCheckBig,
+  ClipboardCheck,
+  Database,
+  Eye,
+  Grid2x2,
+  Layers3,
+  MapPinned,
+  Menu,
+  NotebookPen,
+  QrCode,
+  Send,
+  ShieldCheck,
+  Sparkles,
+  Store,
+  TrendingUp,
+  UsersRound,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import heroImage from "@/assets/cafe-hero.jpg";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import heroImage from "@/assets/cafe-hero.webp";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "BoardGameOS — Quản lý vận hành Board Game Cafe" },
+      { title: "BoardGameOS - Quản lý vận hành Board Game Cafe" },
       {
         name: "description",
         content:
-          "Nền tảng theo dõi kho game, linh kiện, bàn chơi và hoạt động nhân viên cho quán board game cafe bằng quy trình đơn giản, trực quan.",
+          "BoardGameOS tập trung kho game, linh kiện, bàn chơi, nhân viên và dữ liệu vận hành của quán board game cafe trên một hệ thống.",
       },
-      { property: "og:title", content: "BoardGameOS — Quản lý vận hành Board Game Cafe" },
+      { property: "og:title", content: "BoardGameOS - Quản lý vận hành Board Game Cafe" },
       {
         property: "og:description",
-        content: "Nền tảng theo dõi kho game, linh kiện, bàn chơi và hoạt động nhân viên cho quán board game cafe bằng quy trình đơn giản, trực quan.",
+        content:
+          "Trải nghiệm MVP quản lý kho game, bàn chơi, linh kiện và trợ lý vận hành AI dành cho board game cafe.",
       },
     ],
   }),
   component: Landing,
 });
 
+const navigation = [
+  { href: "#san-pham", label: "Sản phẩm" },
+  { href: "#quy-trinh", label: "Quy trình" },
+  { href: "#gia-tri", label: "Giá trị" },
+  { href: "#goi-dich-vu", label: "Gói dịch vụ" },
+  { href: "#dang-ky", label: "Đăng ký" },
+];
+
 const problems = [
-  { icon: MapPinned, title: "Khó theo dõi game đang ở bàn nào", text: "Nhân viên phải nhớ thủ công hoặc hỏi lại nhau mỗi khi khách cần đổi game." },
-  { icon: AlertTriangle, title: "Linh kiện dễ bị thiếu hoặc hư hỏng", text: "Thẻ bài, quân cờ thất lạc sau mỗi ca nhưng không có nơi ghi nhận thống nhất." },
-  { icon: NotebookPen, title: "Nhân viên ghi chép không đồng nhất", text: "Mỗi người dùng một cuốn sổ hoặc nhóm chat khác nhau, dữ liệu rời rạc." },
-  { icon: Eye, title: "Chủ quán khó theo dõi từ xa", text: "Không có bức tranh tổng quan về bàn, game và sự cố trong ngày." },
+  {
+    icon: MapPinned,
+    title: "Khó theo dõi game đang ở đâu",
+    text: "Nhân viên phải nhớ thủ công hoặc hỏi lại nhau khi khách cần đổi game.",
+  },
+  {
+    icon: AlertTriangle,
+    title: "Linh kiện dễ thiếu hoặc hư hỏng",
+    text: "Thẻ bài và quân cờ thất lạc nhưng không có nơi ghi nhận thống nhất.",
+  },
+  {
+    icon: NotebookPen,
+    title: "Ghi nhận vận hành rời rạc",
+    text: "Sổ tay và nhóm chat khiến thông tin khó tìm lại giữa các ca làm việc.",
+  },
+  {
+    icon: Eye,
+    title: "Chủ quán thiếu góc nhìn tổng thể",
+    text: "Không có một nơi để xem nhanh tình trạng bàn, game và sự cố trong ngày.",
+  },
+];
+
+const productViews = [
+  {
+    value: "overview",
+    label: "Tổng quan",
+    image: "/landing/overview.webp",
+    alt: "Dashboard tổng quan vận hành của BoardGameOS",
+    title: "Nhìn toàn bộ ca làm việc trong một màn hình",
+    text: "KPI, cảnh báo, trạng thái bàn và hoạt động gần đây được sắp xếp theo mức độ ưu tiên.",
+  },
+  {
+    value: "tables",
+    label: "Bàn chơi",
+    image: "/landing/tables.webp",
+    alt: "Màn hình quản lý trạng thái bàn chơi trong BoardGameOS",
+    title: "Theo dõi từng bàn theo thời gian thực",
+    text: "Nhân viên biết bàn nào đang chơi, cần hỗ trợ, có sự cố hoặc đang sẵn sàng đón khách.",
+  },
+  {
+    value: "inventory",
+    label: "Kho và linh kiện",
+    image: "/landing/inventory.webp",
+    alt: "Kho board game với ảnh bìa và trạng thái trong BoardGameOS",
+    title: "Quản lý game bằng hình ảnh và trạng thái rõ ràng",
+    text: "Tìm game, xem vị trí, kiểm tra linh kiện và nhận biết ngay game nào có thể giao cho khách.",
+  },
+  {
+    value: "ai",
+    label: "AI chatbot",
+    image: "/landing/ai-chatbot.webp",
+    alt: "Chatbot trợ lý vận hành AI mở trên dashboard BoardGameOS",
+    title: "Hỏi dữ liệu vận hành bằng ngôn ngữ tự nhiên",
+    text: "Chatbot đọc snapshot hiện tại để hỗ trợ tra cứu, hướng dẫn luật và tư vấn game phù hợp.",
+  },
 ];
 
 const solutions = [
-  { icon: Boxes, title: "Quản lý kho game", text: "Danh mục game kèm trạng thái, vị trí và lịch sử sử dụng." },
-  { icon: QrCode, title: "QR giao nhận", text: "Rút ngắn thao tác giao nhận game giữa kho và bàn chơi." },
-  { icon: ClipboardCheck, title: "Checklist linh kiện", text: "Hỗ trợ kiểm soát linh kiện mỗi lần nhận lại game." },
-  { icon: Grid2x2, title: "Sơ đồ bàn", text: "Xem nhanh bàn trống, bàn đang chơi và bàn cần hỗ trợ." },
-  { icon: TrendingUp, title: "Báo cáo tập trung", text: "Tập trung dữ liệu vận hành để quản lý quán hiệu quả hơn." },
+  { icon: Boxes, title: "Kho game", text: "Trạng thái, vị trí, ảnh bìa và lịch sử từng bộ game." },
+  {
+    icon: QrCode,
+    title: "QR giao nhận",
+    text: "Rút ngắn thao tác giao game và nhận lại từ bàn chơi.",
+  },
+  {
+    icon: ClipboardCheck,
+    title: "Checklist linh kiện",
+    text: "Ghi rõ linh kiện đầy đủ, thiếu số lượng hoặc hư hỏng.",
+  },
+  {
+    icon: Grid2x2,
+    title: "Sơ đồ bàn",
+    text: "Theo dõi khách, thời gian chơi, game và nhân viên phụ trách.",
+  },
+  {
+    icon: TrendingUp,
+    title: "Báo cáo",
+    text: "Tổng hợp lượt chơi, mức dùng bàn và sự cố theo thời gian.",
+  },
 ];
 
 const steps = [
-  { n: "01", title: "Tạo dữ liệu game", text: "Nhập danh mục game, checklist linh kiện và vị trí lưu trữ." },
-  { n: "02", title: "Quét QR để giao game", text: "Chọn bàn, xác nhận nhân viên giao và hoàn tất trong vài thao tác." },
-  { n: "03", title: "Kiểm tra khi nhận lại", text: "Đối chiếu checklist, ghi nhận linh kiện thiếu hoặc hư hỏng." },
-  { n: "04", title: "Theo dõi báo cáo", text: "Xem lượt sử dụng, sự cố và hiệu suất bàn theo thời gian." },
+  {
+    n: "01",
+    title: "Khai báo game",
+    text: "Tạo danh mục, vị trí lưu trữ và checklist linh kiện chuẩn.",
+  },
+  { n: "02", title: "Giao game", text: "Quét QR, chọn bàn và ghi nhận nhân viên thực hiện." },
+  { n: "03", title: "Nhận và kiểm tra", text: "Đối chiếu linh kiện, ghi nhận thiếu hoặc hư hỏng." },
+  {
+    n: "04",
+    title: "Theo dõi báo cáo",
+    text: "Xem tình hình sử dụng, cảnh báo và hiệu suất vận hành.",
+  },
+];
+
+const values = [
+  {
+    icon: UsersRound,
+    audience: "Dành cho nhân viên",
+    title: "Thao tác nhanh và nhất quán hơn",
+    items: [
+      "Biết game nào đang sẵn sàng để tư vấn khách.",
+      "Giao nhận game theo một quy trình chung.",
+      "Kiểm tra linh kiện với số lượng cụ thể.",
+      "Giảm phụ thuộc vào kinh nghiệm cá nhân.",
+    ],
+  },
+  {
+    icon: Store,
+    audience: "Dành cho chủ quán",
+    title: "Nắm tình hình mà không cần hỏi từng người",
+    items: [
+      "Theo dõi tập trung game, bàn và nhân viên.",
+      "Phát hiện sự cố cần ưu tiên xử lý.",
+      "Phân quyền giao diện theo vai trò.",
+      "Có dữ liệu để đánh giá hoạt động của quán.",
+    ],
+  },
+];
+
+const aiQuestions = [
+  "Game nào đang thiếu linh kiện?",
+  "Bàn nào đang cần hỗ trợ?",
+  "Cách chơi Dixit như thế nào?",
+  "Gợi ý game có sẵn cho nhóm 6 người.",
 ];
 
 const plans = [
-  { name: "Cơ bản", desc: "Dành cho quán một chi nhánh mới bắt đầu số hóa kho game.", items: ["Kho game và checklist", "Sơ đồ bàn", "Giao nhận bằng QR"], tag: "Đang thử nghiệm" },
-  { name: "Tiêu chuẩn", desc: "Dành cho quán đã vận hành ổn định, cần báo cáo và phân quyền.", items: ["Toàn bộ gói Cơ bản", "Báo cáo vận hành", "Phân quyền nhân viên"], tag: "Liên hệ", featured: true },
-  { name: "Chuỗi", desc: "Dành cho chuỗi nhiều chi nhánh cần dữ liệu tập trung.", items: ["Toàn bộ gói Tiêu chuẩn", "Quản lý nhiều chi nhánh", "Hỗ trợ triển khai"], tag: "Liên hệ" },
+  {
+    name: "Cơ bản",
+    icon: Store,
+    status: "Dùng thử MVP",
+    desc: "Dành cho quán một chi nhánh mới bắt đầu số hóa kho game.",
+    items: ["Kho game và checklist", "Sơ đồ bàn", "Giao nhận bằng QR"],
+    action: "Chọn gói Cơ bản",
+  },
+  {
+    name: "Tiêu chuẩn",
+    icon: Sparkles,
+    status: "Đề xuất",
+    desc: "Dành cho quán đã vận hành ổn định, cần báo cáo và phân quyền.",
+    items: ["Toàn bộ gói Cơ bản", "Báo cáo vận hành", "Phân quyền nhân viên"],
+    action: "Chọn gói Tiêu chuẩn",
+    featured: true,
+  },
+  {
+    name: "Chuỗi",
+    icon: Building2,
+    status: "Liên hệ tư vấn",
+    desc: "Dành cho chuỗi nhiều chi nhánh cần dữ liệu tập trung.",
+    items: ["Toàn bộ gói Tiêu chuẩn", "Quản lý nhiều chi nhánh", "Hỗ trợ triển khai"],
+    action: "Trao đổi về gói Chuỗi",
+  },
 ];
 
+type Submission = {
+  contact: string;
+  store: string;
+  plan: string;
+};
+
 function Landing() {
-  const [sent, setSent] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState("Tiêu chuẩn");
+  const [submission, setSubmission] = useState<Submission | null>(null);
+
+  const scrollToRegistration = (plan: string) => {
+    setSelectedPlan(plan);
+    setSubmission(null);
+    window.requestAnimationFrame(() => {
+      document.getElementById("dang-ky")?.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+      });
+    });
+  };
+
+  const submitRegistration = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    setSubmission({
+      contact: String(formData.get("contact") ?? ""),
+      store: String(formData.get("store") ?? ""),
+      plan: selectedPlan,
+    });
+    toast.success("Đã mô phỏng tiếp nhận đăng ký demo");
+  };
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-30 border-b border-border bg-background/85 backdrop-blur">
+      <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <div className="flex items-center gap-2.5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-              <Grid2x2 className="h-4.5 w-4.5" />
-            </span>
-            <span className="font-semibold tracking-tight">BoardGameOS</span>
-          </div>
-          <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
-            <a href="#giai-phap" className="transition-colors hover:text-foreground">Giải pháp</a>
-            <a href="#quy-trinh" className="transition-colors hover:text-foreground">Quy trình</a>
-            <a href="#goi-dich-vu" className="transition-colors hover:text-foreground">Gói dịch vụ</a>
-            <a href="#dang-ky" className="transition-colors hover:text-foreground">Đăng ký demo</a>
+          <Brand />
+
+          <nav className="hidden items-center gap-6 text-sm text-muted-foreground lg:flex">
+            {navigation.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className="transition-colors hover:text-foreground"
+              >
+                {item.label}
+              </a>
+            ))}
           </nav>
-          <Button asChild className="rounded-xl">
-            <Link to="/login">Xem bản demo</Link>
-          </Button>
+
+          <div className="flex items-center gap-2">
+            <Button asChild className="hidden sm:inline-flex">
+              <Link to="/login">Mở bản demo</Link>
+            </Button>
+            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Mở menu">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[min(320px,85vw)] bg-card">
+                <SheetHeader className="text-left">
+                  <SheetTitle>BoardGameOS</SheetTitle>
+                  <SheetDescription>Đi tới nội dung bạn muốn xem.</SheetDescription>
+                </SheetHeader>
+                <nav className="mt-8 space-y-1">
+                  {navigation.map((item) => (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      className="block rounded-lg px-3 py-3 text-sm font-medium hover:bg-accent"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      {item.label}
+                    </a>
+                  ))}
+                </nav>
+                <Button asChild className="mt-6 w-full">
+                  <Link to="/login">Trải nghiệm bản demo</Link>
+                </Button>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </header>
 
       <main>
-        <section className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 sm:px-6 lg:grid-cols-2 lg:py-20">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
+        <section className="relative flex min-h-[80svh] items-center overflow-hidden bg-foreground text-white">
+          <img
+            src={heroImage}
+            alt="Không gian board game cafe với kệ game và bàn chơi"
+            width={1920}
+            height={1280}
+            fetchPriority="high"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black/65" />
+          <div className="relative mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+            <p className="text-sm font-semibold uppercase text-white/75">
               Nền tảng vận hành cho Board Game Cafe
-            </span>
-            <h1 className="mt-5 text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
-              Quản lý Board Game Cafe trên một nền tảng duy nhất
-            </h1>
-            <p className="mt-4 max-w-xl text-base text-muted-foreground sm:text-lg">
-              Theo dõi game, linh kiện, bàn chơi và hoạt động nhân viên bằng quy trình đơn giản, trực quan.
             </p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Button asChild size="lg" className="rounded-xl">
+            <h1 className="mt-4 text-4xl font-semibold sm:text-5xl">BoardGameOS</h1>
+            <p className="mt-5 max-w-3xl text-3xl font-semibold leading-tight sm:text-4xl">
+              Quản lý quán board game trên một nền tảng duy nhất
+            </p>
+            <p className="mt-5 max-w-2xl text-base leading-7 text-white/75 sm:text-lg">
+              Theo dõi kho game, linh kiện, bàn chơi và hoạt động nhân viên bằng quy trình rõ ràng,
+              tập trung và dễ sử dụng trong mỗi ca làm việc.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Button asChild size="lg">
                 <Link to="/login">
-                  Xem bản demo <ArrowRight className="h-4 w-4" />
+                  Trải nghiệm bản demo <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="rounded-xl">
-                <a href="#dang-ky">Đăng ký dùng thử</a>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="border-white/40 bg-white/5 text-white hover:bg-white hover:text-foreground"
+              >
+                <a href="#quy-trinh">Xem cách hoạt động</a>
               </Button>
             </div>
-            <dl className="mt-9 grid max-w-md grid-cols-3 gap-4 text-sm">
-              {[
-                ["Kho game", "Trạng thái theo thời gian thực"],
-                ["Linh kiện", "Checklist từng bộ game"],
-                ["Bàn chơi", "Sơ đồ trực quan"],
-              ].map(([t, d]) => (
-                <div key={t}>
-                  <dt className="font-medium">{t}</dt>
-                  <dd className="mt-1 text-xs text-muted-foreground">{d}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-          <div className="card-soft overflow-hidden p-2">
-            <img
-              src={heroImage}
-              alt="Không gian board game cafe với kệ gỗ chứa nhiều bộ board game"
-              width={1280}
-              height={960}
-              className="h-full w-full rounded-xl object-cover"
-            />
-          </div>
-        </section>
-
-        <section className="border-y border-border bg-surface/60 py-14">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Vấn đề thường gặp tại quán</h2>
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
-              {problems.map((p) => (
-                <div key={p.title} className="card-soft card-hover p-5">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-destructive/10 text-destructive">
-                    <p.icon className="h-5 w-5" />
-                  </span>
-                  <h3 className="mt-4 font-medium">{p.title}</h3>
-                  <p className="mt-1.5 text-sm text-muted-foreground">{p.text}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="giai-phap" className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Giải pháp của BoardGameOS</h2>
-          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Năm nhóm chức năng cốt lõi giúp tập trung dữ liệu vận hành của quán về một nơi.
-          </p>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {solutions.map((s) => (
-              <div key={s.title} className="card-soft card-hover p-5">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/12 text-primary">
-                  <s.icon className="h-5 w-5" />
+            <div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-sm text-white/70">
+              {["Demo MVP", "Không cần cài đặt", "Có vai trò Chủ quán và Nhân viên"].map((item) => (
+                <span key={item} className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-success" /> {item}
                 </span>
-                <h3 className="mt-4 font-medium">{s.title}</h3>
-                <p className="mt-1.5 text-sm text-muted-foreground">{s.text}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </section>
 
-        <section id="quy-trinh" className="border-y border-border bg-surface/60 py-14">
+        <section className="border-b border-border bg-card py-16">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Quy trình hoạt động</h2>
-            <div className="mt-8 grid gap-4 md:grid-cols-4">
-              {steps.map((s) => (
-                <div key={s.n} className="card-soft p-5">
-                  <span className="text-sm font-semibold text-primary">{s.n}</span>
-                  <h3 className="mt-3 font-medium">{s.title}</h3>
-                  <p className="mt-1.5 text-sm text-muted-foreground">{s.text}</p>
+            <SectionIntro
+              eyebrow="Bài toán vận hành"
+              title="Những khoảng trống xuất hiện trong mỗi ca làm việc"
+              description="Khi dữ liệu nằm trong trí nhớ, sổ tay và nhóm chat, một thao tác đơn giản cũng có thể mất nhiều thời gian hơn cần thiết."
+            />
+            <div className="mt-10 grid border-t border-border md:grid-cols-2">
+              {problems.map((problem, index) => (
+                <div
+                  key={problem.title}
+                  className={`flex gap-4 border-b border-border py-6 md:px-6 ${
+                    index % 2 === 0 ? "md:border-r md:pl-0" : "md:pr-0"
+                  }`}
+                >
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-destructive/10 text-destructive">
+                    <problem.icon className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <h3 className="font-semibold">{problem.title}</h3>
+                    <p className="mt-1.5 text-sm leading-6 text-muted-foreground">{problem.text}</p>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section id="goi-dich-vu" className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Gói dịch vụ</h2>
-          <p className="mt-2 text-sm text-muted-foreground">Sản phẩm đang trong giai đoạn thử nghiệm cùng các quán đối tác.</p>
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {plans.map((p) => (
+        <section id="san-pham" className="scroll-mt-20 py-16 sm:py-20">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <SectionIntro
+              eyebrow="Sản phẩm đang hoạt động"
+              title="Không chỉ là ý tưởng, đây là trải nghiệm có thể sử dụng"
+              description="Các màn hình dưới đây được chụp trực tiếp từ BoardGameOS với dữ liệu demo hiện tại."
+            />
+            <Tabs defaultValue="overview" className="mt-10">
+              <TabsList className="grid h-auto w-full grid-cols-2 gap-1 bg-muted p-1 lg:inline-grid lg:w-auto lg:grid-cols-4">
+                {productViews.map((view) => (
+                  <TabsTrigger key={view.value} value={view.value} className="h-10">
+                    {view.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              {productViews.map((view) => (
+                <TabsContent key={view.value} value={view.value} className="mt-5">
+                  <figure className="overflow-hidden rounded-lg border border-border bg-card shadow-soft">
+                    <div className="aspect-video overflow-hidden bg-muted">
+                      <img
+                        src={view.image}
+                        alt={view.alt}
+                        width={1200}
+                        height={675}
+                        loading="lazy"
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <figcaption className="border-t border-border p-5 sm:flex sm:items-start sm:justify-between sm:gap-8">
+                      <h3 className="font-semibold sm:max-w-sm">{view.title}</h3>
+                      <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground sm:mt-0">
+                        {view.text}
+                      </p>
+                    </figcaption>
+                  </figure>
+                </TabsContent>
+              ))}
+            </Tabs>
+
+            <div className="mt-14 grid border-y border-border sm:grid-cols-2 lg:grid-cols-5">
+              {solutions.map((solution, index) => (
+                <div
+                  key={solution.title}
+                  className={`py-6 sm:px-5 ${index > 0 ? "lg:border-l lg:border-border" : ""}`}
+                >
+                  <solution.icon className="h-5 w-5 text-primary" />
+                  <h3 className="mt-3 text-sm font-semibold">{solution.title}</h3>
+                  <p className="mt-1.5 text-xs leading-5 text-muted-foreground">{solution.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section
+          id="quy-trinh"
+          className="scroll-mt-20 border-y border-border bg-surface py-16 sm:py-20"
+        >
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <SectionIntro
+              eyebrow="Quy trình hoạt động"
+              title="Một vòng đời game được ghi nhận từ đầu đến cuối"
+              description="Mọi thao tác quan trọng đều quay về cùng một nguồn dữ liệu để ca sau có thể tiếp tục ngay."
+            />
+            <ol className="relative mt-12 grid gap-0 md:grid-cols-4 md:border-t md:border-border">
+              {steps.map((step) => (
+                <li
+                  key={step.n}
+                  className="relative border-l border-border pb-10 pl-8 last:pb-0 md:border-l-0 md:px-4 md:pb-0 md:pt-8"
+                >
+                  <span className="absolute -left-3 top-0 flex h-6 w-6 items-center justify-center rounded-full border border-primary bg-background text-[10px] font-semibold text-primary md:-top-3 md:left-4">
+                    {step.n}
+                  </span>
+                  <h3 className="font-semibold">{step.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{step.text}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        <section id="gia-tri" className="scroll-mt-20 py-16 sm:py-20">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <SectionIntro
+              eyebrow="Giá trị mang lại"
+              title="Tốt hơn cho người trực tiếp làm việc và người quản lý"
+              description="BoardGameOS tập trung vào những quyết định nhỏ nhưng lặp lại liên tục trong vận hành quán."
+            />
+            <div className="mt-10 grid border-y border-border lg:grid-cols-2">
+              {values.map((value, index) => (
+                <div
+                  key={value.audience}
+                  className={`py-8 lg:px-10 ${index === 0 ? "border-b border-border lg:border-b-0 lg:border-r lg:pl-0" : "lg:pr-0"}`}
+                >
+                  <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-secondary text-secondary-foreground">
+                    <value.icon className="h-5 w-5" />
+                  </span>
+                  <p className="mt-5 text-xs font-semibold uppercase text-primary">
+                    {value.audience}
+                  </p>
+                  <h3 className="mt-2 text-xl font-semibold">{value.title}</h3>
+                  <ul className="mt-5 space-y-3">
+                    {value.items.map((item) => (
+                      <li
+                        key={item}
+                        className="flex items-start gap-3 text-sm text-muted-foreground"
+                      >
+                        <CircleCheckBig className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="border-y border-border bg-foreground py-16 text-white sm:py-20">
+          <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[0.85fr_1.15fr]">
+            <div>
+              <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-white/10 text-white">
+                <Bot className="h-5 w-5" />
+              </span>
+              <p className="mt-6 text-xs font-semibold uppercase text-white/60">
+                Trợ lý vận hành AI
+              </p>
+              <h2 className="mt-2 text-3xl font-semibold">
+                Hỏi dữ liệu của quán bằng ngôn ngữ tự nhiên
+              </h2>
+              <p className="mt-4 text-sm leading-7 text-white/65">
+                Gemini chỉ trả lời dựa trên snapshot dữ liệu BoardGameOS hiện tại. Chatbot hỗ trợ
+                tra cứu trạng thái, luật cơ bản và tư vấn game trong phạm vi dữ liệu demo.
+              </p>
+              <ul className="mt-7 divide-y divide-white/10 border-y border-white/10">
+                {aiQuestions.map((question) => (
+                  <li key={question} className="flex items-center gap-3 py-3 text-sm text-white/80">
+                    <Sparkles className="h-4 w-4 shrink-0 text-primary" /> {question}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <figure className="overflow-hidden rounded-lg border border-white/15 bg-white/5 p-2 shadow-lift">
+              <img
+                src="/landing/ai-chatbot.webp"
+                alt="Chatbot AI đang mở trên dashboard BoardGameOS"
+                width={1200}
+                height={675}
+                loading="lazy"
+                className="aspect-video w-full rounded-lg object-cover"
+              />
+            </figure>
+          </div>
+        </section>
+
+        <section id="goi-dich-vu" className="scroll-mt-20 py-16 sm:py-20">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <SectionIntro
+              eyebrow="Gói dịch vụ"
+              title="Bắt đầu theo đúng quy mô vận hành"
+              description="Các gói đang được dùng để kiểm chứng nhu cầu trong giai đoạn MVP và chưa công bố mức giá thương mại."
+            />
+            <div className="mt-10 grid gap-4 md:grid-cols-3">
+              {plans.map((plan) => (
+                <article
+                  key={plan.name}
+                  className={`flex min-h-[390px] flex-col rounded-lg border bg-card p-6 ${
+                    plan.featured ? "border-primary ring-1 ring-primary/20" : "border-border"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <span
+                      className={`flex h-10 w-10 items-center justify-center rounded-lg ${plan.featured ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}`}
+                    >
+                      <plan.icon className="h-5 w-5" />
+                    </span>
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-xs font-semibold ${plan.featured ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}
+                    >
+                      {plan.status}
+                    </span>
+                  </div>
+                  <h3 className="mt-6 text-xl font-semibold">{plan.name}</h3>
+                  <p className="mt-2 min-h-16 text-sm leading-6 text-muted-foreground">
+                    {plan.desc}
+                  </p>
+                  <ul className="mt-6 space-y-3 border-t border-border pt-5 text-sm">
+                    {plan.items.map((item) => (
+                      <li key={item} className="flex items-start gap-2.5">
+                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" /> {item}
+                      </li>
+                    ))}
+                  </ul>
+                  <Button
+                    type="button"
+                    variant={plan.featured ? "default" : "outline"}
+                    className="mt-auto w-full"
+                    onClick={() => scrollToRegistration(plan.name)}
+                  >
+                    {plan.action}
+                  </Button>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section
+          id="dang-ky"
+          className="scroll-mt-20 border-t border-border bg-surface py-16 sm:py-20"
+        >
+          <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.8fr_1.2fr]">
+            <div>
+              <p className="text-xs font-semibold uppercase text-primary">Đăng ký nhận bản demo</p>
+              <h2 className="mt-2 text-3xl font-semibold">
+                Trao đổi về cách BoardGameOS phù hợp với quán của bạn
+              </h2>
+              <p className="mt-4 text-sm leading-7 text-muted-foreground">
+                Form này mô phỏng luồng tiếp nhận nhu cầu trong MVP. Dữ liệu không được gửi tới
+                backend, email hoặc lưu trên trình duyệt.
+              </p>
+              <div className="mt-8 space-y-5 border-t border-border pt-6">
+                {[
+                  {
+                    icon: Layers3,
+                    title: "Chọn gói quan tâm",
+                    text: "Bắt đầu từ nhu cầu và quy mô hiện tại.",
+                  },
+                  {
+                    icon: Send,
+                    title: "Điền thông tin quán",
+                    text: "Mô phỏng dữ liệu cần có cho một yêu cầu tư vấn.",
+                  },
+                  {
+                    icon: ShieldCheck,
+                    title: "Xác nhận ngay trên trang",
+                    text: "Không có request hoặc dữ liệu nào được lưu lại.",
+                  },
+                ].map((item) => (
+                  <div key={item.title} className="flex gap-3">
+                    <item.icon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                    <div>
+                      <p className="text-sm font-semibold">{item.title}</p>
+                      <p className="mt-1 text-xs leading-5 text-muted-foreground">{item.text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {submission ? (
               <div
-                key={p.name}
-                className={`card-soft p-6 ${p.featured ? "border-primary/40 ring-1 ring-primary/20" : ""}`}
+                className="flex min-h-[480px] flex-col items-center justify-center rounded-lg border border-success/30 bg-card p-8 text-center shadow-soft"
+                aria-live="polite"
               >
-                <h3 className="text-lg font-semibold">{p.name}</h3>
-                <p className="mt-1.5 text-sm text-muted-foreground">{p.desc}</p>
-                <ul className="mt-4 space-y-2 text-sm">
-                  {p.items.map((i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <Check className="mt-0.5 h-4 w-4 text-success" /> {i}
-                    </li>
-                  ))}
-                </ul>
-                <Button asChild variant={p.featured ? "default" : "outline"} className="mt-6 w-full rounded-xl">
-                  <a href="#dang-ky">{p.tag}</a>
+                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-success/12 text-success">
+                  <CircleCheckBig className="h-7 w-7" />
+                </span>
+                <p className="mt-6 text-xs font-semibold uppercase text-success">
+                  Mô phỏng tiếp nhận thành công
+                </p>
+                <h3 className="mt-2 text-2xl font-semibold">Cảm ơn {submission.contact}</h3>
+                <p className="mt-3 max-w-md text-sm leading-6 text-muted-foreground">
+                  BoardGameOS đã mô phỏng tiếp nhận yêu cầu của{" "}
+                  <strong className="text-foreground">{submission.store}</strong> cho gói{" "}
+                  <strong className="text-foreground">{submission.plan}</strong>.
+                </p>
+                <div className="mt-6 max-w-md rounded-lg border border-border bg-muted/45 p-4 text-sm text-muted-foreground">
+                  Đây là bản demo frontend. Thông tin vừa nhập không được gửi tới backend và không
+                  được lưu lại.
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="mt-7"
+                  onClick={() => setSubmission(null)}
+                >
+                  Gửi đăng ký khác
                 </Button>
               </div>
-            ))}
-          </div>
-        </section>
-
-        <section id="dang-ky" className="border-t border-border bg-surface/60 py-14">
-          <div className="mx-auto max-w-3xl px-4 sm:px-6">
-            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Đăng ký nhận bản demo</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Điền thông tin để nhóm triển khai liên hệ và hướng dẫn dùng thử.
-            </p>
-            <form
-              className="card-soft mt-8 grid gap-4 p-6 sm:grid-cols-2"
-              onSubmit={(e) => {
-                e.preventDefault();
-                setSent(true);
-                toast.success("Đã gửi thông tin đăng ký demo");
-              }}
-            >
-              <Field id="contact" label="Tên người liên hệ" required />
-              <Field id="store" label="Tên quán" required />
-              <Field id="phone" label="Số điện thoại" type="tel" required />
-              <Field id="email" label="Email" type="email" required />
-              <Field id="city" label="Thành phố" required />
-              <Field id="games" label="Số lượng game" type="number" placeholder="Ví dụ: 60" />
-              <Field id="branches" label="Số chi nhánh" type="number" placeholder="Ví dụ: 1" />
-              <div className="sm:col-span-2">
-                <Label htmlFor="need">Nhu cầu chính</Label>
-                <Textarea
-                  id="need"
-                  className="mt-1.5 rounded-xl"
-                  placeholder="Ví dụ: kiểm soát linh kiện và theo dõi bàn chơi"
-                />
-              </div>
-              <div className="flex items-center gap-3 sm:col-span-2">
-                <Button type="submit" className="rounded-xl">Gửi đăng ký</Button>
-                {sent ? <span className="text-sm text-success">Cảm ơn bạn, chúng tôi sẽ liên hệ sớm.</span> : null}
-              </div>
-            </form>
+            ) : (
+              <form
+                className="rounded-lg border border-border bg-card p-5 shadow-soft sm:p-7"
+                onSubmit={submitRegistration}
+              >
+                <div className="border-b border-border pb-5">
+                  <h3 className="font-semibold">Thông tin đăng ký</h3>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Các trường có dấu * là bắt buộc.
+                  </p>
+                </div>
+                <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                  <Field id="contact" label="Tên người liên hệ" required />
+                  <Field id="store" label="Tên quán" required />
+                  <Field
+                    id="phone"
+                    label="Số điện thoại"
+                    type="tel"
+                    inputMode="tel"
+                    pattern={"\\+?[0-9][0-9\\x20\\x28\\x29\\x2D]{7,17}"}
+                    title="Số điện thoại cần có từ 8 đến 18 ký tự hợp lệ."
+                    required
+                  />
+                  <Field id="email" label="Email" type="email" required />
+                  <Field id="city" label="Thành phố" required />
+                  <div>
+                    <Label htmlFor="plan">Gói quan tâm</Label>
+                    <Select name="plan" value={selectedPlan} onValueChange={setSelectedPlan}>
+                      <SelectTrigger id="plan" className="mt-1.5">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {plans.map((plan) => (
+                          <SelectItem key={plan.name} value={plan.name}>
+                            {plan.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Field
+                    id="games"
+                    label="Số lượng game"
+                    type="number"
+                    inputMode="numeric"
+                    min={1}
+                    max={5000}
+                    placeholder="Ví dụ: 60"
+                  />
+                  <Field
+                    id="branches"
+                    label="Số chi nhánh"
+                    type="number"
+                    inputMode="numeric"
+                    min={1}
+                    max={100}
+                    placeholder="Ví dụ: 1"
+                  />
+                  <div className="sm:col-span-2">
+                    <Label htmlFor="need">Nhu cầu chính</Label>
+                    <Textarea
+                      id="need"
+                      name="need"
+                      className="mt-1.5 min-h-28"
+                      placeholder="Ví dụ: kiểm soát linh kiện và theo dõi bàn chơi"
+                    />
+                  </div>
+                </div>
+                <Button type="submit" className="mt-6 w-full sm:w-auto">
+                  <Send className="h-4 w-4" /> Gửi đăng ký mô phỏng
+                </Button>
+              </form>
+            )}
           </div>
         </section>
       </main>
 
       <footer className="border-t border-border bg-card">
-        <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-4">
-          <div className="md:col-span-2">
-            <div className="flex items-center gap-2.5">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                <Grid2x2 className="h-4.5 w-4.5" />
-              </span>
-              <span className="font-semibold tracking-tight">BoardGameOS</span>
-            </div>
-            <p className="mt-3 max-w-sm text-sm text-muted-foreground">
-              Nền tảng quản lý vận hành dành cho quán board game cafe: kho game, linh kiện, bàn chơi và nhân viên.
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.5fr_1fr_1fr]">
+          <div>
+            <Brand />
+            <p className="mt-4 max-w-md text-sm leading-6 text-muted-foreground">
+              Demo MVP môn Khởi nghiệp, tập trung số hóa quy trình vận hành cho quán board game
+              cafe.
             </p>
+            <div className="mt-5 flex flex-wrap gap-2 text-xs text-muted-foreground">
+              {["React", "TanStack Start", "Gemini", "Vercel"].map((tech) => (
+                <span key={tech} className="rounded-full border border-border px-2.5 py-1">
+                  {tech}
+                </span>
+              ))}
+            </div>
           </div>
           <div>
-            <p className="text-sm font-medium">Sản phẩm</p>
-            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-              <li><a href="#giai-phap" className="hover:text-foreground">Giải pháp</a></li>
-              <li><a href="#quy-trinh" className="hover:text-foreground">Quy trình</a></li>
-              <li><Link to="/login" className="hover:text-foreground">Bản demo</Link></li>
-              <li><a href="#dang-ky" className="hover:text-foreground">Chính sách bảo mật</a></li>
-              <li><a href="#dang-ky" className="hover:text-foreground">Điều khoản sử dụng</a></li>
+            <p className="text-sm font-semibold">Khám phá</p>
+            <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
+              {navigation.slice(0, 4).map((item) => (
+                <li key={item.href}>
+                  <a href={item.href} className="hover:text-foreground">
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+              <li>
+                <Link to="/login" className="hover:text-foreground">
+                  Mở bản demo
+                </Link>
+              </li>
             </ul>
           </div>
           <div>
-            <p className="text-sm font-medium">Liên hệ</p>
-            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+            <p className="text-sm font-semibold">Liên hệ demo</p>
+            <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
               <li>hello@boardgameos.vn</li>
               <li>0909 123 456</li>
               <li>24 Lê Thánh Tôn, Quận 1, TP.HCM</li>
@@ -285,9 +794,39 @@ function Landing() {
           </div>
         </div>
         <div className="border-t border-border py-5 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} BoardGameOS. Sản phẩm đang trong giai đoạn thử nghiệm.
+          <span suppressHydrationWarning>© {new Date().getFullYear()} BoardGameOS.</span> Bản demo
+          phục vụ mục đích học tập.
         </div>
       </footer>
+    </div>
+  );
+}
+
+function Brand() {
+  return (
+    <Link to="/" className="inline-flex items-center gap-2.5">
+      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+        <Grid2x2 className="h-4.5 w-4.5" />
+      </span>
+      <span className="font-semibold">BoardGameOS</span>
+    </Link>
+  );
+}
+
+function SectionIntro({
+  eyebrow,
+  title,
+  description,
+}: {
+  eyebrow: string;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="max-w-3xl">
+      <p className="text-xs font-semibold uppercase text-primary">{eyebrow}</p>
+      <h2 className="mt-2 text-2xl font-semibold sm:text-3xl">{title}</h2>
+      <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">{description}</p>
     </div>
   );
 }
@@ -298,19 +837,41 @@ function Field({
   type = "text",
   required,
   placeholder,
+  inputMode,
+  pattern,
+  title,
+  min,
+  max,
 }: {
   id: string;
   label: string;
   type?: string;
   required?: boolean;
   placeholder?: string;
+  inputMode?: "text" | "tel" | "email" | "numeric";
+  pattern?: string;
+  title?: string;
+  min?: number;
+  max?: number;
 }) {
   return (
     <div>
       <Label htmlFor={id}>
         {label} {required ? <span className="text-destructive">*</span> : null}
       </Label>
-      <Input id={id} type={type} required={required} placeholder={placeholder} className="mt-1.5 rounded-xl" />
+      <Input
+        id={id}
+        name={id}
+        type={type}
+        required={required}
+        placeholder={placeholder}
+        inputMode={inputMode}
+        pattern={pattern}
+        title={title}
+        min={min}
+        max={max}
+        className="mt-1.5"
+      />
     </div>
   );
 }

@@ -42,6 +42,7 @@ Dữ liệu nghiệp vụ được lưu trên trình duyệt bằng `localStorag
 
 ## ✨ Tính năng chính
 
+- Landing page giới thiệu vấn đề, giao diện sản phẩm thật, quy trình vận hành, giá trị theo vai trò và ba gói dịch vụ.
 - Dashboard tổng quan game, bàn chơi, sự cố, cảnh báo cần xử lý và hoạt động gần đây.
 - Kho game: tìm kiếm, lọc, thêm game, xem chi tiết, ảnh bìa trực quan, cập nhật trạng thái, tạo và tải mã QR thật.
 - Khai báo và chỉnh sửa danh sách linh kiện chuẩn; kiểm tra trạng thái đầy đủ, thiếu hoặc hư hỏng khi nhận lại game.
@@ -55,28 +56,30 @@ Dữ liệu nghiệp vụ được lưu trên trình duyệt bằng `localStorag
 - Cài đặt thông tin quán, công tắc mô phỏng tính năng tương lai và khôi phục dữ liệu mẫu.
 - Giao diện responsive cho desktop, tablet và mobile.
 
+Form đăng ký trên landing page là luồng mô phỏng frontend-only dành cho MVP. Dữ liệu nhập vào không được gửi tới backend, không được lưu vào `localStorage` và sẽ mất khi tải lại trang.
+
 <a id="cong-nghe-su-dung"></a>
 
 ## 🧰 Công nghệ sử dụng
 
-| Công nghệ | Phiên bản | Mục đích |
-| --- | --- | --- |
-| ![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB) | 19 | Xây dựng giao diện component |
-| ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white) | 5.8 | Kiểm tra kiểu dữ liệu và giảm lỗi khi phát triển |
-| ![TanStack](https://img.shields.io/badge/TanStack_Start-FF4154?style=flat-square&logo=reactquery&logoColor=white) | 1.168 | Framework ứng dụng và server function cho Gemini |
-| ![TanStack Router](https://img.shields.io/badge/TanStack_Router-FF4154?style=flat-square&logo=reactquery&logoColor=white) | 1.170 | File-based routing và điều hướng không tải lại trang |
-| ![TanStack Query](https://img.shields.io/badge/TanStack_Query-FF4154?style=flat-square&logo=reactquery&logoColor=white) | 5.101 | Hạ tầng dữ liệu bất đồng bộ, sẵn sàng cho API về sau |
-| ![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white) | 8 | Development server và build production |
-| ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white) | 4 | Theme và thiết kế responsive |
-| ![Radix UI](https://img.shields.io/badge/Radix_UI-161618?style=flat-square&logo=radixui&logoColor=white) | 1.x | Hành vi và accessibility cho UI component |
-| ![shadcn/ui](https://img.shields.io/badge/shadcn%2Fui-000000?style=flat-square&logo=shadcnui&logoColor=white) | Source-based | Các component giao diện dùng chung |
-| ![Gemini](https://img.shields.io/badge/Google_Gemini-8E75B2?style=flat-square&logo=googlegemini&logoColor=white) | GenAI SDK 2.15 | Chatbot hỏi đáp dữ liệu vận hành |
-| ![Zod](https://img.shields.io/badge/Zod-3E67B1?style=flat-square&logo=zod&logoColor=white) | 3.24 | Kiểm tra JSON do Gemini trả về |
-| ![Recharts](https://img.shields.io/badge/Recharts-22B5BF?style=flat-square&logo=chartdotjs&logoColor=white) | 2.15 | Biểu đồ báo cáo 7, 14 và 30 ngày |
-| ![Lucide](https://img.shields.io/badge/Lucide-111827?style=flat-square&logo=lucide&logoColor=F56565) | 0.575 | Icon trong giao diện |
-| ![Sonner](https://img.shields.io/badge/Sonner-111827?style=flat-square) | 2.0 | Toast phản hồi sau thao tác |
-| QRCode React | 4.2 | Tạo mã QR game trên frontend |
-| ![Web Storage](https://img.shields.io/badge/localStorage-E34F26?style=flat-square&logo=html5&logoColor=white) | Browser API | Lưu dữ liệu và session demo trên trình duyệt |
+| Công nghệ                                                                                                                 | Phiên bản      | Mục đích                                             |
+| ------------------------------------------------------------------------------------------------------------------------- | -------------- | ---------------------------------------------------- |
+| ![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB)                         | 19             | Xây dựng giao diện component                         |
+| ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)           | 5.8            | Kiểm tra kiểu dữ liệu và giảm lỗi khi phát triển     |
+| ![TanStack](https://img.shields.io/badge/TanStack_Start-FF4154?style=flat-square&logo=reactquery&logoColor=white)         | 1.168          | Framework ứng dụng và server function cho Gemini     |
+| ![TanStack Router](https://img.shields.io/badge/TanStack_Router-FF4154?style=flat-square&logo=reactquery&logoColor=white) | 1.170          | File-based routing và điều hướng không tải lại trang |
+| ![TanStack Query](https://img.shields.io/badge/TanStack_Query-FF4154?style=flat-square&logo=reactquery&logoColor=white)   | 5.101          | Hạ tầng dữ liệu bất đồng bộ, sẵn sàng cho API về sau |
+| ![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white)                             | 8              | Development server và build production               |
+| ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)      | 4              | Theme và thiết kế responsive                         |
+| ![Radix UI](https://img.shields.io/badge/Radix_UI-161618?style=flat-square&logo=radixui&logoColor=white)                  | 1.x            | Hành vi và accessibility cho UI component            |
+| ![shadcn/ui](https://img.shields.io/badge/shadcn%2Fui-000000?style=flat-square&logo=shadcnui&logoColor=white)             | Source-based   | Các component giao diện dùng chung                   |
+| ![Gemini](https://img.shields.io/badge/Google_Gemini-8E75B2?style=flat-square&logo=googlegemini&logoColor=white)          | GenAI SDK 2.15 | Chatbot hỏi đáp dữ liệu vận hành                     |
+| ![Zod](https://img.shields.io/badge/Zod-3E67B1?style=flat-square&logo=zod&logoColor=white)                                | 3.24           | Kiểm tra JSON do Gemini trả về                       |
+| ![Recharts](https://img.shields.io/badge/Recharts-22B5BF?style=flat-square&logo=chartdotjs&logoColor=white)               | 2.15           | Biểu đồ báo cáo 7, 14 và 30 ngày                     |
+| ![Lucide](https://img.shields.io/badge/Lucide-111827?style=flat-square&logo=lucide&logoColor=F56565)                      | 0.575          | Icon trong giao diện                                 |
+| ![Sonner](https://img.shields.io/badge/Sonner-111827?style=flat-square)                                                   | 2.0            | Toast phản hồi sau thao tác                          |
+| QRCode React                                                                                                              | 4.2            | Tạo mã QR game trên frontend                         |
+| ![Web Storage](https://img.shields.io/badge/localStorage-E34F26?style=flat-square&logo=html5&logoColor=white)             | Browser API    | Lưu dữ liệu và session demo trên trình duyệt         |
 
 <a id="yeu-cau-moi-truong"></a>
 
@@ -171,10 +174,10 @@ http://localhost:8080/
 
 ## 👥 Tài khoản demo
 
-| Vai trò | Email | Mật khẩu demo |
-| --- | --- | --- |
-| Chủ quán | `owner@boardgameos.vn` | `demo1234` |
-| Nhân viên | `staff@boardgameos.vn` | `demo1234` |
+| Vai trò   | Email                  | Mật khẩu demo |
+| --------- | ---------------------- | ------------- |
+| Chủ quán  | `owner@boardgameos.vn` | `demo1234`    |
+| Nhân viên | `staff@boardgameos.vn` | `demo1234`    |
 
 Đăng nhập hiện là mô phỏng phục vụ MVP. Tài khoản chưa được xác thực bằng backend thật.
 
@@ -342,6 +345,7 @@ Khôi phục dữ liệu cần xác nhận và không làm mất session đăng 
 BoardGameOS/
 ├── doc/                         Tài liệu prompt và kế hoạch AI
 ├── public/                      Tài nguyên public
+│   └── landing/                Screenshot giao diện thật dùng trên landing page
 ├── src/
 │   ├── assets/                  Ảnh sử dụng trong website
 │   ├── components/
@@ -369,17 +373,17 @@ Không chỉnh sửa thủ công `src/routeTree.gen.ts` vì file này được T
 
 ## 🧭 Các route chính
 
-| URL | Chức năng | Quyền truy cập |
-| --- | --- | --- |
-| `/` | Trang giới thiệu | Công khai |
-| `/login` | Đăng nhập demo | Công khai |
-| `/app` | Dashboard | Tất cả tài khoản |
-| `/app/games` | Kho game | Tất cả tài khoản |
-| `/app/games/:gameId` | Chi tiết game | Tất cả tài khoản |
-| `/app/tables` | Bàn chơi | Tất cả tài khoản |
-| `/app/handover` | Giao nhận game | Tất cả tài khoản |
-| `/app/checklist` | Kiểm tra linh kiện | Tất cả tài khoản |
-| `/app/advisor` | Tư vấn game bằng bộ lọc | Tất cả tài khoản |
-| `/app/staff` | Quản lý nhân viên | Chủ quán |
-| `/app/reports` | Báo cáo | Chủ quán |
-| `/app/settings` | Cài đặt | Chủ quán |
+| URL                  | Chức năng               | Quyền truy cập   |
+| -------------------- | ----------------------- | ---------------- |
+| `/`                  | Trang giới thiệu        | Công khai        |
+| `/login`             | Đăng nhập demo          | Công khai        |
+| `/app`               | Dashboard               | Tất cả tài khoản |
+| `/app/games`         | Kho game                | Tất cả tài khoản |
+| `/app/games/:gameId` | Chi tiết game           | Tất cả tài khoản |
+| `/app/tables`        | Bàn chơi                | Tất cả tài khoản |
+| `/app/handover`      | Giao nhận game          | Tất cả tài khoản |
+| `/app/checklist`     | Kiểm tra linh kiện      | Tất cả tài khoản |
+| `/app/advisor`       | Tư vấn game bằng bộ lọc | Tất cả tài khoản |
+| `/app/staff`         | Quản lý nhân viên       | Chủ quán         |
+| `/app/reports`       | Báo cáo                 | Chủ quán         |
+| `/app/settings`      | Cài đặt                 | Chủ quán         |

@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useStore } from "@/lib/bgos/store";
-import heroImage from "@/assets/cafe-hero.jpg";
+import heroImage from "@/assets/cafe-hero.webp";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
